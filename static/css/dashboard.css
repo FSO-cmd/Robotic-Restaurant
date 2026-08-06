@@ -1,0 +1,434 @@
+/* =====================================================
+   Robot Restaurant Dashboard
+   Part 1
+===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800&display=swap');
+
+:root{
+
+    --bg:#0f172a;
+
+    --bg2:#111827;
+
+    --card:#1e293b;
+
+    --card2:#273449;
+
+    --border:#334155;
+
+    --text:#ffffff;
+
+    --text2:#cbd5e1;
+
+    --primary:#ff9800;
+
+    --primary2:#ff6d00;
+
+    --blue:#00bcd4;
+
+    --green:#22c55e;
+
+    --red:#ef4444;
+
+    --yellow:#facc15;
+
+}
+
+*{
+
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+    font-family:"Vazirmatn",sans-serif;
+
+}
+
+body{
+
+    background:var(--bg);
+
+    color:var(--text);
+
+    min-height:100vh;
+
+}
+
+/* ===========================
+Scrollbar
+=========================== */
+
+::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:var(--primary);
+
+    border-radius:20px;
+
+}
+
+/* ===========================
+Header
+=========================== */
+
+.header{
+
+    background:linear-gradient(135deg,#111827,#1e293b);
+
+    border-bottom:3px solid var(--primary);
+
+    padding:25px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.35);
+
+}
+
+.header h2{
+
+    font-weight:800;
+
+    color:white;
+
+}
+
+.header p{
+
+    color:var(--text2);
+
+    margin-top:8px;
+
+}
+
+.header i{
+
+    color:var(--primary);
+
+}
+
+/* ===========================
+Status Cards
+=========================== */
+
+.status-group{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+}
+
+.status-card{
+
+    width:170px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    padding:15px;
+
+    text-align:center;
+
+    transition:.3s;
+
+    cursor:pointer;
+
+}
+
+.status-card:hover{
+
+    transform:translateY(-5px);
+
+    border-color:var(--blue);
+
+    box-shadow:0 0 20px rgba(0,188,212,.3);
+
+}
+
+.status-card i{
+
+    display:block;
+
+    font-size:28px;
+
+    color:var(--primary);
+
+    margin-bottom:10px;
+
+}
+
+.status-card span{
+
+    display:block;
+
+    color:var(--text2);
+
+    margin-bottom:5px;
+
+}
+
+.status-card b{
+
+    font-size:18px;
+
+}
+
+/* ===========================
+Section Title
+=========================== */
+
+.section-title{
+
+    font-size:22px;
+
+    margin-bottom:20px;
+
+    font-weight:700;
+
+    color:white;
+
+}
+
+.section-title i{
+
+    margin-left:8px;
+
+}
+
+/* ===========================
+Columns
+=========================== */
+
+.order-column{
+
+    min-height:650px;
+
+    background:#111827;
+
+    border:1px solid var(--border);
+
+    border-radius:20px;
+
+    padding:18px;
+
+}
+
+/* ===========================
+Order Card
+=========================== */
+
+.order-card{
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    padding:18px;
+
+    margin-bottom:20px;
+
+    transition:.3s;
+
+}
+
+.order-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 0 20px rgba(0,188,212,.25);
+
+}
+
+.order-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:15px;
+
+    font-weight:bold;
+
+    font-size:18px;
+
+}
+
+.order-body p{
+
+    margin-bottom:10px;
+
+    color:var(--text2);
+
+    font-size:15px;
+
+}
+
+.order-footer{
+
+    display:flex;
+
+    gap:10px;
+
+    margin-top:18px;
+
+}
+
+/* رنگ کارت ها */
+
+.new-order{
+
+    border-right:6px solid var(--yellow);
+
+}
+
+.cooking{
+
+    border-right:6px solid var(--blue);
+
+}
+
+.ready{
+
+    border-right:6px solid var(--green);
+
+}
+
+.rejected{
+
+    border-right:6px solid var(--red);
+
+}
+
+/* ===========================
+Buttons
+=========================== */
+
+.btn{
+
+    border-radius:12px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.btn-success{
+
+    background:var(--green);
+
+    border:none;
+
+}
+
+.btn-danger{
+
+    background:var(--red);
+
+    border:none;
+
+}
+
+.btn-warning{
+
+    background:var(--primary);
+
+    color:white;
+
+    border:none;
+
+}
+
+.btn-warning:hover{
+
+    background:var(--primary2);
+
+    color:white;
+
+}
+
+/* ===========================
+Badge
+=========================== */
+
+.badge{
+
+    padding:8px 12px;
+
+    border-radius:20px;
+
+    font-size:13px;
+
+}
+
+/* ===========================
+Progress
+=========================== */
+
+.progress{
+
+    height:12px;
+
+    border-radius:20px;
+
+    background:#162033;
+
+}
+
+.progress-bar{
+
+    font-weight:bold;
+
+}
+
+/* ===========================
+Animation
+=========================== */
+
+.order-card{
+
+    animation:fadeIn .4s ease;
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}

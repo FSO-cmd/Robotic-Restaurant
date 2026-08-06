@@ -1,0 +1,360 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="fa" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1">
+
+<title>
+
+رستوران رباتی هوشمند
+
+</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
+rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="{% static 'css/customer.css' %}">
+
+</head>
+
+<body>
+
+<!-- Header -->
+
+<header class="header">
+
+<div class="container">
+
+<div class="row align-items-center">
+
+<div class="col-md-8">
+
+<h1>
+
+<i class="bi bi-robot"></i>
+
+Yazd_Engi-Nex
+</h1>
+
+<p>
+
+به رستوران تیم 5 خوش امدید
+
+
+</p>
+
+</div>
+
+<div class="col-md-4 text-start">
+
+<div class="robot-status">
+
+<span class="dot"></span>
+
+اماده دریافت سفارش
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+<!-- انتخاب میز -->
+
+<section class="container mt-4">
+
+<div class="table-card">
+
+<h3>
+
+<i class="bi bi-geo-alt-fill"></i>
+
+انتخاب میز
+
+</h3>
+
+<div class="row mt-3">
+
+<div class="col-md-6">
+
+<select
+id="tableNumber"
+class="form-select">
+
+<option value="">
+
+شماره میز را انتخاب کنید
+
+</option>
+
+<option value="1">میز 1</option>
+
+<option value="2">میز 2</option>
+
+<option value="3">میز 3</option>
+
+<option value="4">میز 4</option>
+
+<option value="5">میز 5</option>
+
+<option value="6">میز 6</option>
+
+<option value="7">میز 7</option>
+
+<option value="8">میز 8</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- منوی غذا -->
+
+<section class="container mt-5">
+
+<div class="row">
+
+
+<div class="col-lg-8">
+
+<h2 class="section-title">
+
+منوی غذا
+
+</h2>
+
+<div class="row g-4">
+
+<!-- غذا -->
+
+<div class="col-md-6 col-xl-4">
+
+<div class="food-card">
+
+<img src="{% static 'images/kebab.jpg' %}">
+
+<div class="food-body">
+
+<h4>
+
+چلوکباب مخصوص
+
+</h4>
+
+<p>
+
+برنج ایرانی + کباب کوبیده
+
+</p>
+
+<div class="price">
+
+280,000 تومان
+
+</div>
+
+<button
+class="btn btn-warning w-100"
+
+onclick="addFood(
+1,
+'چلوکباب مخصوص',
+280000
+)">
+
+افزودن
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- غذا -->
+
+<div class="col-md-6 col-xl-4">
+
+<div class="food-card">
+
+<img src="{% static 'images/pizza.jpg' %}">
+
+<div class="food-body">
+
+<h4>
+
+پیتزا مخصوص
+
+</h4>
+
+<p>
+
+پنیر، قارچ، گوشت
+
+</p>
+
+<div class="price">
+
+350,000 تومان
+
+</div>
+
+<button
+class="btn btn-warning w-100"
+
+onclick="addFood(
+2,
+'پیتزا مخصوص',
+350000
+)">
+
+افزودن
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- غذا -->
+
+<div class="col-md-6 col-xl-4">
+
+<div class="food-card">
+
+<img src="{% static 'images/burger.jpg' %}">
+
+<div class="food-body">
+
+<h4>
+
+برگر ویژه
+
+</h4>
+
+<p>
+
+برگر دست ساز
+
+</p>
+
+<div class="price">
+
+240,000 تومان
+
+</div>
+
+<button
+class="btn btn-warning w-100"
+
+onclick="addFood(
+3,
+'برگر ویژه',
+240000
+)">
+
+افزودن
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- سبد خرید -->
+
+<div class="col-lg-4">
+
+<div class="cart">
+
+<h3>
+
+<i class="bi bi-cart-fill"></i>
+
+سبد خرید
+
+</h3>
+
+<hr>
+
+<div id="cartItems">
+
+<div class="empty-cart">
+
+سبد خرید خالی است
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="total-box">
+
+<span>
+
+جمع کل
+
+</span>
+
+<span id="totalPrice">
+
+0
+
+</span>
+
+تومان
+
+</div>
+
+<button
+
+class="btn btn-order w-100 mt-4"
+
+onclick="submitOrder()">
+
+ثبت سفارش
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<script src="{% static 'js/customer.js' %}"></script>
+
+</body>
+
+</html>
