@@ -6,4 +6,5 @@ order management. Designed for performance, scalability, and seamless hardware-s
 
 ## INSTALL ##
 git clone https://github.com/FSO-cmd/Robotic-Restaurant.git
+
 cd Robotic-Restaurant
