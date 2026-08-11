@@ -1,30 +1,48 @@
 from django.shortcuts import render
-
-# Create your views here.
-import json
-
 from django.http import JsonResponse
-
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Order
+import json
 
-from .models import OrderItem
-from django.shortcuts import render
-from .models import Food
+from .models import Order, OrderItem, Food
+
+
+# =========================
+# صفحه مشتری
+# =========================
+
 def customer(request):
 
-    foods = Food.objects.filter(available=True)
+    foods = Food.objects.all().order_by("id")
 
-    return render(request, "customer.html", {
+    return render(
+        request,
+        "customer.html",
+        {
+            "foods": foods
+        }
+    )
 
-        "foods": foods
 
-    })
+# =========================
+# داشبورد فیدر
+# =========================
+
+def dashboard(request):
+
+    return render(
+        request,
+        "dashboard.html"
+    )
+
+
+# =========================
+# دریافت لیست غذاها
+# =========================
 
 def get_foods(request):
 
-    foods = Food.objects.all()
+    foods = Food.objects.all().order_by("id")
 
     result = []
 
@@ -33,32 +51,94 @@ def get_foods(request):
         result.append({
 
             "id": food.id,
+
             "name": food.name,
+
             "stock": food.stock,
+
             "price": food.price
 
         })
 
-    return JsonResponse(result, safe=False)
-def customer(request):
-    return render(request, "customer.html")
-def dashboard(request):
-    return render(request, "dashboard.html")
+    return JsonResponse(
+        result,
+        safe=False
+    )
+
 @csrf_exempt
+def create_food(request):
 
-def create_order(request):
-
-    if request.method!="POST":
-
+    if request.method != "POST":
         return JsonResponse({
+            "error": "POST only"
+        }, status=405)
 
-            "error":"POST only"
+    data = json.loads(request.body)
 
+    food = Food.objects.create(
+        name=data["name"],
+        price=data["price"],
+        stock=data["stock"]
+    )
+
+    return JsonResponse({
+        "success": True,
+        "id": food.id,
+        "name": food.name,
+        "price": food.price,
+        "stock": food.stock
+    })
+
+@csrf_exempt
+def update_food(request, id):
+
+    if request.method != "PUT":
+        return JsonResponse({
+            "error": "PUT only"
         })
 
-    data=json.loads(request.body)
+    try:
+        food = Food.objects.get(id=id)
 
-    order=Order.objects.create(
+    except Food.DoesNotExist:
+        return JsonResponse({
+            "error": "Food not found"
+        }, status=404)
+
+    data = json.loads(request.body)
+
+    food.name = data.get("name", food.name)
+    food.price = data.get("price", food.price)
+    food.stock = data.get("stock", food.stock)
+
+    food.save()
+
+    return JsonResponse({
+        "success": True,
+        "id": food.id,
+        "name": food.name,
+        "price": food.price,
+        "stock": food.stock
+    })
+# =========================
+# ایجاد سفارش
+# =========================
+
+@csrf_exempt
+def create_order(request):
+
+    if request.method != "POST":
+
+        return JsonResponse(
+            {
+                "error": "POST only"
+            },
+            status=405
+        )
+
+    data = json.loads(request.body)
+
+    order = Order.objects.create(
 
         table=data["table"],
 
@@ -82,86 +162,119 @@ def create_order(request):
 
     return JsonResponse({
 
-        "success":True,
+        "success": True,
 
-        "id":order.id
+        "id": order.id
 
     })
+
+
+# =========================
+# دریافت سفارش‌های جدید
+# =========================
+
 def get_orders(request):
 
-    orders=Order.objects.filter(
+    orders = Order.objects.filter(
 
         status="new"
 
     ).order_by("-id")
 
-    result=[]
+    result = []
 
     for order in orders:
 
-        items=[]
+        items = []
 
         for item in order.items.all():
 
             items.append({
 
-                "name":item.name,
+                "name": item.name,
 
-                "quantity":item.quantity,
+                "quantity": item.quantity,
 
-                "price":item.price
+                "price": item.price
 
             })
 
         result.append({
 
-            "id":order.id,
+            "id": order.id,
 
-            "table":order.table,
+            "table": order.table,
 
-            "status":order.status,
+            "status": order.status,
 
-            "total":order.total,
+            "total": order.total,
 
-            "items":items
+            "items": items
 
         })
 
     return JsonResponse(
-
         result,
-
         safe=False
-
     )
+
+
+# =========================
+# تایید سفارش
+# =========================
+
 @csrf_exempt
+def accept_order(request, id):
 
-def accept_order(request,id):
+    order = Order.objects.get(id=id)
 
-    order=Order.objects.get(id=id)
-
-    order.status="accepted"
+    order.status = "accepted"
 
     order.save()
 
     return JsonResponse({
 
-        "success":True
+        "success": True
+
+    })
+
+
+# =========================
+# رد سفارش
+# =========================
+
+@csrf_exempt
+def reject_order(request, id):
+
+    order = Order.objects.get(id=id)
+
+    order.status = "rejected"
+
+    order.save()
+
+    return JsonResponse({
+
+        "success": True
 
     })
 
 @csrf_exempt
+def delete_food(request, id):
 
-def reject_order(request,id):
+    if request.method != "DELETE":
+        return JsonResponse({
+            "error": "DELETE only"
+        }, status=405)
 
-    order=Order.objects.get(id=id)
+    try:
+        food = Food.objects.get(id=id)
+    except Food.DoesNotExist:
+        return JsonResponse({
+            "error": "Food not found"
+        }, status=404)
 
-    order.status="rejected"
-
-    order.save()
+    food.delete()
 
     return JsonResponse({
-
-        "success":True
-
+        "success": True
     })

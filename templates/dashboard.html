@@ -1,486 +1,866 @@
 {% load static %}
+
 <!DOCTYPE html>
+
 <html lang="fa" dir="rtl">
 
 <head>
 
+```
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
 
 <title>پنل فیدر | ربات حمل غذا</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
+    rel="stylesheet">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet">
 
-<link rel="stylesheet"
-href="{% static 'css/dashboard.css' %}">
+<link
+    rel="stylesheet"
+    href="{% static 'css/dashboard.css' %}">
+```
 
 </head>
 
 <body>
 
-<!-- ================= Header ================= -->
+<!-- =====================================================
+     Header
+===================================================== -->
 
 <header class="header">
 
+```
 <div class="container-fluid">
 
-<div class="row align-items-center">
+    <div class="row align-items-center">
 
-<div class="col-lg-4">
+        <div class="col-lg-4">
 
-<h2>
+            <h2>
 
-<i class="bi bi-cpu-fill"></i>
+                <i class="bi bi-cpu-fill"></i>
 
-پنل مدیریت فیدر
+                پنل مدیریت فیدر
 
-</h2>
+            </h2>
 
-<p>
+            <p>
 
-کنترل سفارش‌ها و ارسال به ربات
+                کنترل سفارش‌ها و ارسال به ربات
 
-</p>
+            </p>
 
-</div>
+        </div>
 
-<div class="col-lg-8 text-start">
 
-<div class="status-group">
+        <div class="col-lg-8 text-start">
 
-<div class="status-card">
+            <div class="status-group">
 
-<i class="bi bi-robot"></i>
 
-<span>
+                <!-- ربات -->
 
-ربات
+                <div class="status-card">
 
-</span>
+                    <i class="bi bi-robot"></i>
 
-<b class="text-success">
+                    <span>
+                        ربات
+                    </span>
 
-آماده
+                    <b class="text-success">
+                        آماده
+                    </b>
 
-</b>
+                </div>
 
-</div>
 
-<div class="status-card">
+                <!-- فیدر -->
 
-<i class="bi bi-box-seam"></i>
+                <div class="status-card">
 
-<span>
+                    <i class="bi bi-box-seam"></i>
 
-فیدر
+                    <span>
+                        فیدر
+                    </span>
 
-</span>
+                    <b class="text-success">
+                        آماده بارگیری
+                    </b>
 
-<b class="text-success">
+                </div>
 
-آماده بارگیری
 
-</b>
+                <!-- باتری -->
 
-</div>
+                <div class="status-card">
 
-<div class="status-card">
+                    <i class="bi bi-battery-half"></i>
 
-<i class="bi bi-battery-half"></i>
+                    <span>
+                        باتری
+                    </span>
 
-<span>
+                    <b>
+                        91%
+                    </b>
 
-باتری
+                </div>
 
-</span>
 
-<b>
+                <!-- سفارش فعال -->
 
-91%
+                <div class="status-card">
 
-</b>
+                    <i class="bi bi-list-check"></i>
 
-</div>
+                    <span>
+                        سفارش فعال
+                    </span>
 
-<div class="status-card">
+                    <b id="activeOrdersCount">
+                        0
+                    </b>
 
-<i class="bi bi-list-check"></i>
-<div class="row">
+                </div>
 
-{% for food in foods %}
 
-<div class="col-lg-4 col-md-6 mb-4">
+            </div>
 
-    <div class="food-card">
-
-        {% if food.image %}
-            <img src="{{ food.image.url }}" class="food-image">
-        {% endif %}
-
-        <h4>{{ food.name }}</h4>
-
-        <p>{{ food.price }} تومان</p>
-
-        {% if food.stock > 0 %}
-
-            <button
-                class="btn btn-warning w-100"
-                onclick="addFood({{ food.id }}, '{{ food.name }}', {{ food.price }})">
-
-                افزودن
-
-            </button>
-
-        {% else %}
-
-            <button class="btn btn-secondary w-100" disabled>
-
-                ناموجود
-
-            </button>
-
-        {% endif %}
+        </div>
 
     </div>
 
 </div>
-
-{% endfor %}
-
-</div>
-<span>
-
-سفارش فعال
-
-</span>
-
-<b>
-
-3
-
-</b>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+```
 
 </header>
 
-<!-- ================= Dashboard ================= -->
+<!-- =====================================================
+     Dashboard
+===================================================== -->
 
 <div class="container-fluid mt-4">
 
+```
 <div class="row">
 
-<!-- سفارش‌های جدید -->
 
-<div class="col-lg-4">
+    <!-- =================================================
+         سفارش‌های جدید
+    ================================================= -->
 
-    <h4 class="section-title">
+    <div class="col-lg-4">
 
-        <i class="bi bi-bell-fill text-warning"></i>
+        <h4 class="section-title">
 
-        سفارش‌های جدید
+            <i class="bi bi-bell-fill text-warning"></i>
 
-    </h4>
+            سفارش‌های جدید
 
-    <div class="order-column" id="ordersContainer">
+        </h4>
+
+
+        <div
+            class="order-column"
+            id="ordersContainer">
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         در حال آماده سازی
+    ================================================= -->
+
+    <div class="col-lg-4">
+
+        <h4 class="section-title">
+
+            <i class="bi bi-fire text-danger"></i>
+
+            در حال آماده سازی
+
+        </h4>
+
+
+        <div class="order-column">
+
+            <div class="order-card cooking">
+
+                <div class="order-header">
+
+                    <span>
+                        سفارش #118
+                    </span>
+
+                    <span class="badge bg-primary">
+                        آماده سازی
+                    </span>
+
+                </div>
+
+
+                <div class="order-body">
+
+                    <p>
+                        🍕 پیتزا ×1
+                    </p>
+
+                    <p>
+                        🥤 نوشابه ×2
+                    </p>
+
+                    <p>
+                        🍽 میز 7
+                    </p>
+
+                </div>
+
+
+                <div class="progress mt-3">
+
+                    <div
+                        class="progress-bar progress-bar-striped progress-bar-animated"
+                        style="width:60%">
+
+                        60%
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-3">
+
+                    <button
+                        class="btn btn-warning w-100"
+                        onclick="loadRobot(118)">
+
+                        بارگیری و ارسال
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         وضعیت ربات
+    ================================================= -->
+
+    <div class="col-lg-4">
+
+        <h4 class="section-title">
+
+            <i class="bi bi-robot"></i>
+
+            وضعیت ربات
+
+        </h4>
+
+
+        <div class="robot-panel">
+
+            <div class="robot-status">
+
+
+                <div class="robot-icon">
+                    🤖
+                </div>
+
+
+                <h5>
+                    Robot-01
+                </h5>
+
+
+                <p>
+
+                    وضعیت:
+
+                    <span class="text-success">
+                        آماده
+                    </span>
+
+                </p>
+
+
+                <p>
+
+                    مقصد:
+
+                    -
+
+                </p>
+
+
+                <p>
+
+                    باتری:
+
+                    91%
+
+                </p>
+
+
+                <hr>
+
+
+                <h6>
+                    آخرین تحویل‌ها
+                </h6>
+
+
+                <ul class="list-group">
+
+                    <li class="list-group-item">
+
+                        سفارش 115
+
+                        <span>
+                            میز 2
+                        </span>
+
+                    </li>
+
+
+                    <li class="list-group-item">
+
+                        سفارش 116
+
+                        <span>
+                            میز 5
+                        </span>
+
+                    </li>
+
+
+                    <li class="list-group-item">
+
+                        سفارش 117
+
+                        <span>
+                            میز 3
+                        </span>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
 
     </div>
 
 </div>
 
-<!-- Card -->
-
-<div class="food-stock">
-
-    <h5>📦 موجودی فیدر</h5>
-
-    <div id="foodStock"></div>
-
-</div>
 
 
-<!-- آماده سازی -->
+<!-- =================================================
+     مدیریت منوی غذا
+================================================= -->
 
-<div class="col-lg-4">
+<div class="row mt-5">
 
-<h4 class="section-title">
+    <div class="col-12">
 
-<i class="bi bi-fire text-danger"></i>
 
-در حال آماده سازی
+        <div class="d-flex justify-content-between align-items-center mb-3">
 
-</h4>
+            <h4 class="section-title mb-0">
 
-<div class="order-column">
+                <i class="bi bi-egg-fried"></i>
 
-<div class="order-card cooking">
+                مدیریت منوی غذا
 
-<div class="order-header">
+            </h4>
 
-<span>
 
-سفارش #118
+            <button
+                class="btn btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#addFoodModal">
 
-</span>
+                <i class="bi bi-plus-lg"></i>
 
-<span class="badge bg-primary">
+                افزودن غذا
 
-آماده سازی
+            </button>
 
-</span>
+        </div>
 
-</div>
 
-<div class="order-body">
 
-<p>
+        <!-- جدول غذاها -->
 
-🍕 پیتزا ×1
+        <div class="card shadow-sm">
 
-</p>
+            <div class="card-body">
 
-<p>
+                <div class="table-responsive">
 
-🥤 نوشابه ×2
+                    <table class="table table-hover align-middle text-center">
 
-</p>
+                        <thead>
 
-<p>
+                            <tr>
 
-🍽 میز 7
+                                <th>
+                                    نام غذا
+                                </th>
 
-</p>
+                                <th>
+                                    قیمت
+                                </th>
 
-</div>
+                                <th>
+                                    موجودی
+                                </th>
 
-<div class="progress mt-3">
+                                <th>
+                                    وضعیت
+                                </th>
 
-<div class="progress-bar progress-bar-striped progress-bar-animated"
+                                <th>
+                                    عملیات
+                                </th>
 
-style="width:60%">
+                            </tr>
 
-60%
+                        </thead>
 
-</div>
 
-</div>
+                        <tbody id="foodsContainer">
 
-<div class="mt-3">
+                            <!-- JavaScript -->
 
-<button
+                        </tbody>
 
-class="btn btn-warning w-100"
+                    </table>
 
-onclick="loadRobot(118)">
+                </div>
 
-بارگیری و ارسال
+            </div>
 
-</button>
+        </div>
 
-</div>
-
-</div>
-
-</div>
+    </div>
 
 </div>
 
-<!-- وضعیت ربات -->
 
-<div class="col-lg-4">
 
-<h4 class="section-title">
+<!-- =================================================
+     موجودی فیدر
+================================================= -->
 
-<i class="bi bi-robot"></i>
+<div class="row mt-4">
 
-وضعیت ربات
+    <div class="col-lg-6">
 
-</h4>
+        <div class="food-stock">
 
-<div class="robot-panel">
+            <h5>
 
-<div class="robot-status">
+                📦 موجودی فیدر
 
-<div class="robot-icon">
+            </h5>
 
-🤖
+
+            <div id="foodStockContainer">
+
+
+                <!-- JavaScript -->
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
 
 </div>
 
-<h5>
+<!-- =====================================================
+     Modal افزودن غذا
+===================================================== -->
 
-Robot-01
+<div
+    class="modal fade"
+    id="addFoodModal"
+    tabindex="-1"
+    aria-hidden="true">
 
-</h5>
-
-<p>
-
-وضعیت:
-
-<span class="text-success">
-
-آماده
-
-</span>
-
-</p>
-
-<p>
-
-مقصد:
-
--
-
-</p>
-
-<p>
-
-باتری:
-
-91%
-
-</p>
-
-<hr>
-
-<h6>
-
-آخرین تحویل‌ها
-
-</h6>
-
-<ul class="list-group">
-
-<li class="list-group-item">
-
-سفارش 115
-
-<span>
-
-میز 2
-
-</span>
-
-</li>
-
-<li class="list-group-item">
-
-سفارش 116
-
-<span>
-
-میز 5
-
-</span>
-
-</li>
-
-<li class="list-group-item">
-
-سفارش 117
-
-<span>
-
-میز 3
-
-</span>
-
-</li>
-
-</ul>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ================= Modal ================= -->
-
-<div class="modal fade"
-
-id="robotModal"
-
-tabindex="-1">
-
+```
 <div class="modal-dialog">
 
-<div class="modal-content">
+    <div class="modal-content">
 
-<div class="modal-header">
 
-<h5>
+        <div class="modal-header">
 
-ارسال سفارش
+            <h5 class="modal-title">
 
-</h5>
+                <i class="bi bi-plus-circle"></i>
+
+                افزودن غذای جدید
+
+            </h5>
+
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal">
+
+            </button>
+
+        </div>
+
+
+
+        <div class="modal-body">
+
+
+            <!-- نام -->
+
+            <div class="mb-3">
+
+                <label class="form-label">
+
+                    نام غذا
+
+                </label>
+
+
+                <input
+                    type="text"
+                    id="foodName"
+                    class="form-control"
+                    placeholder="مثلاً کباب">
+
+            </div>
+
+
+
+            <!-- قیمت -->
+
+            <div class="mb-3">
+
+                <label class="form-label">
+
+                    قیمت
+
+                </label>
+
+
+                <input
+                    type="number"
+                    id="foodPrice"
+                    class="form-control"
+                    placeholder="مثلاً 250000">
+
+            </div>
+
+
+
+            <!-- موجودی -->
+
+            <div class="mb-3">
+
+                <label class="form-label">
+
+                    موجودی
+
+                </label>
+
+
+                <input
+                    type="number"
+                    id="foodStock"
+                    class="form-control"
+                    placeholder="مثلاً 20"
+                    min="0">
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="modal-footer">
+
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+                لغو
+
+            </button>
+
+
+            <button
+                type="button"
+                class="btn btn-success"
+                onclick="createFood()">
+
+                <i class="bi bi-check-lg"></i>
+
+                افزودن غذا
+
+            </button>
+
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+```html
+<!-- =====================================================
+     Modal ویرایش غذا
+===================================================== -->
+
+<div
+    class="modal fade"
+    id="editFoodModal"
+    tabindex="-1"
+    aria-hidden="true">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    <i class="bi bi-pencil-square"></i>
+
+                    ویرایش غذا
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <!-- ID غذا -->
+
+                <input
+                    type="hidden"
+                    id="editFoodId">
+
+
+                <!-- نام غذا -->
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        نام غذا
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="editFoodName"
+                        class="form-control">
+
+                </div>
+
+
+                <!-- قیمت -->
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        قیمت
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="editFoodPrice"
+                        class="form-control"
+                        min="0">
+
+                </div>
+
+
+                <!-- موجودی -->
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        موجودی
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="editFoodStock"
+                        class="form-control"
+                        min="0">
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    لغو
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    onclick="updateFood()">
+
+                    <i class="bi bi-check-lg"></i>
+
+                    ذخیره تغییرات
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+<!-- =====================================================
+     Modal ارسال به ربات
+===================================================== -->
+
+<div
+    class="modal fade"
+    id="robotModal"
+    tabindex="-1">
+
+```
+<div class="modal-dialog">
+
+    <div class="modal-content">
+
+
+        <div class="modal-header">
+
+            <h5>
+
+                ارسال سفارش
+
+            </h5>
+
+        </div>
+
+
+        <div class="modal-body">
+
+            <p>
+
+                غذا داخل فیدر قرار گرفته است؟
+
+            </p>
+
+
+            <div class="alert alert-info">
+
+                پس از تایید، اطلاعات سفارش برای ربات ارسال می‌شود.
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+
+            <button
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+                خیر
+
+            </button>
+
+
+            <button
+                class="btn btn-success"
+                onclick="sendRobot()">
+
+                بله، ارسال شود
+
+            </button>
+
+
+        </div>
+
+    </div>
+
+</div>
+```
 
 </div>
 
-<div class="modal-body">
+<!-- =====================================================
+     JavaScript
+===================================================== -->
 
-<p>
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
 
-غذا داخل فیدر قرار گرفته است؟
-
-</p>
-
-<div class="alert alert-info">
-
-پس از تایید، اطلاعات سفارش برای ربات ارسال می‌شود.
-
-</div>
-
-</div>
-
-<div class="modal-footer">
-
-<button
-
-class="btn btn-secondary"
-
-data-bs-dismiss="modal">
-
-خیر
-
-</button>
-
-<button
-
-class="btn btn-success"
-
-onclick="sendRobot()">
-
-بله، ارسال شود
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script src="{% static 'js/dashboard.js' %}"></script>
-
+<script
+    src="{% static 'js/dashboard.js' %}">
+</script>
 
 </body>
 
