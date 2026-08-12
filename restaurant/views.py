@@ -42,51 +42,76 @@ def dashboard(request):
 
 def get_foods(request):
 
-    foods = Food.objects.all().order_by("id")
+    foods = Food.objects.all()
 
-    result = []
+    data = []
 
     for food in foods:
 
-        result.append({
+        data.append({
 
             "id": food.id,
-
             "name": food.name,
-
+            "price": food.price,
             "stock": food.stock,
 
-            "price": food.price
+            "image":
+            food.image.url if food.image else ""
 
         })
 
+
     return JsonResponse(
-        result,
+        data,
         safe=False
     )
 
 @csrf_exempt
 def create_food(request):
 
-    if request.method != "POST":
+    if request.method == "POST":
+
+        name = request.POST.get("name")
+        price = request.POST.get("price")
+        stock = request.POST.get("stock")
+
+        image = request.FILES.get("image")
+
+
+        if not name:
+            return JsonResponse({
+                "success": False,
+                "error": "نام غذا الزامی است"
+            })
+
+
+        food = Food.objects.create(
+
+            name=name,
+            price=price,
+            stock=stock,
+            image=image
+
+        )
+
+
         return JsonResponse({
-            "error": "POST only"
-        }, status=405)
 
-    data = json.loads(request.body)
+            "success": True,
 
-    food = Food.objects.create(
-        name=data["name"],
-        price=data["price"],
-        stock=data["stock"]
-    )
+            "food": {
+
+                "id": food.id,
+                "name": food.name,
+                "image": food.image.url if food.image else ""
+
+            }
+
+        })
+
 
     return JsonResponse({
-        "success": True,
-        "id": food.id,
-        "name": food.name,
-        "price": food.price,
-        "stock": food.stock
+        "success": False
     })
 
 @csrf_exempt

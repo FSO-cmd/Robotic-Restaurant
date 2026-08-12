@@ -365,77 +365,177 @@ async function loadFoods() {
 // ===============================
 
 function renderFoodsTable(foods) {
+
     const container =
         document.getElementById("foodsContainer");
+
 
     if (!container) {
         return;
     }
 
+
     container.innerHTML = "";
 
+
     if (!foods || foods.length === 0) {
+
         container.innerHTML = `
             <tr>
-                <td colspan="5">
+                <td colspan="6">
                     هنوز غذایی ثبت نشده است.
                 </td>
             </tr>
         `;
+
         return;
     }
 
+
+
     foods.forEach(food => {
+
+
         let status;
         let statusClass;
 
+
         if (food.stock > 5) {
+
             status = "موجود";
             statusClass = "bg-success";
-        } else if (food.stock > 0) {
+
+        }
+        else if (food.stock > 0) {
+
             status = "موجودی کم";
             statusClass = "bg-warning";
-        } else {
+
+        }
+        else {
+
             status = "تمام شده";
             statusClass = "bg-danger";
+
         }
 
+
+
         container.innerHTML += `
-            <tr>
-                <td>
-                    ${food.name}
-                </td>
-                <td>
-                    ${Number(food.price).toLocaleString()}
-                    تومان
-                </td>
-                <td>
-                    ${food.stock}
-                </td>
-                <td>
-                    <span class="badge ${statusClass}">
-                        ${status}
-                    </span>
-                </td>
-                <td>
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-primary"
-                        onclick="editFood(${food.id})">
-                        <i class="bi bi-pencil"></i>
-                        ویرایش
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-danger"
-                        onclick="deleteFood(${food.id})">
-                        <i class="bi bi-trash"></i>
-                        حذف
-                    </button>
-                </td>
-            </tr>
+
+        <tr>
+
+
+            <!-- تصویر غذا -->
+
+            <td>
+
+                ${
+                    food.image
+
+                    ?
+
+                    `
+                    <img
+                    src="${food.image}"
+                    width="60"
+                    height="60"
+                    class="rounded"
+                    style="object-fit:cover;">
+                    `
+
+                    :
+
+                    `
+                    <i class="bi bi-image fs-3 text-secondary"></i>
+                    `
+                }
+
+            </td>
+
+
+
+            <!-- نام -->
+
+            <td>
+                ${food.name}
+            </td>
+
+
+
+            <!-- قیمت -->
+
+            <td>
+
+                ${Number(food.price).toLocaleString()}
+                تومان
+
+            </td>
+
+
+
+            <!-- موجودی -->
+
+            <td>
+
+                ${food.stock}
+
+            </td>
+
+
+
+            <!-- وضعیت -->
+
+            <td>
+
+                <span class="badge ${statusClass}">
+                    ${status}
+                </span>
+
+            </td>
+
+
+
+            <!-- عملیات -->
+
+            <td>
+
+
+                <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                onclick="editFood(${food.id})">
+
+                    <i class="bi bi-pencil"></i>
+
+                    ویرایش
+
+                </button>
+
+
+
+                <button
+                type="button"
+                class="btn btn-sm btn-danger"
+                onclick="deleteFood(${food.id})">
+
+                    <i class="bi bi-trash"></i>
+
+                    حذف
+
+                </button>
+
+
+            </td>
+
+
+        </tr>
+
         `;
+
+
     });
+
 }
 
 
@@ -495,151 +595,290 @@ function renderFoodStock(foods) {
 // ===============================
 
 async function createFood() {
+
     const nameInput =
         document.getElementById("foodName");
+
     const priceInput =
         document.getElementById("foodPrice");
+
     const stockInput =
         document.getElementById("foodStock");
 
+    const imageInput =
+        document.getElementById("foodImage");
+
+
     if (!nameInput || !priceInput || !stockInput) {
-        showToast("فیلدهای افزودن غذا پیدا نشدند.", "danger");
+
+        showToast(
+            "فیلدهای افزودن غذا پیدا نشدند.",
+            "danger"
+        );
+
         return;
     }
+
+
 
     const name = nameInput.value.trim();
     const price = Number(priceInput.value);
     const stock = Number(stockInput.value);
 
+
+
     if (!name) {
-        showToast("نام غذا را وارد کنید.", "warning");
-        return;
-    }
 
-    if (priceInput.value === "" || price < 0) {
-        showToast("قیمت معتبر وارد کنید.", "warning");
-        return;
-    }
-
-    if (stockInput.value === "" || stock < 0) {
-        showToast("موجودی معتبر وارد کنید.", "warning");
-        return;
-    }
-
-    try {
-        const response = await fetch(
-            "/api/foods/create/",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrftoken
-                },
-                body: JSON.stringify({
-                    name: name,
-                    price: price,
-                    stock: stock
-                })
-            }
+        showToast(
+            "نام غذا را وارد کنید.",
+            "warning"
         );
 
+        return;
+    }
+
+
+    if (priceInput.value === "" || price < 0) {
+
+        showToast(
+            "قیمت معتبر وارد کنید.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    if (stockInput.value === "" || stock < 0) {
+
+        showToast(
+            "موجودی معتبر وارد کنید.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+
+    // ساخت فرم برای ارسال فایل
+
+    const formData = new FormData();
+
+
+    formData.append(
+        "name",
+        name
+    );
+
+
+    formData.append(
+        "price",
+        price
+    );
+
+
+    formData.append(
+        "stock",
+        stock
+    );
+
+
+
+    // اگر عکس انتخاب شده بود
+
+    if (
+        imageInput &&
+        imageInput.files.length > 0
+    ) {
+
+        formData.append(
+            "image",
+            imageInput.files[0]
+        );
+
+    }
+
+
+
+    try {
+
+
+        const response = await fetch(
+
+            "/api/foods/create/",
+
+            {
+
+                method: "POST",
+
+                headers: {
+
+                    "X-CSRFToken": csrftoken
+
+                },
+
+
+                body: formData
+
+            }
+
+        );
+
+
+
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
+
+            throw new Error(
+                `HTTP Error: ${response.status}`
+            );
+
         }
 
-        const data = await response.json();
+
+
+        const data =
+            await response.json();
+
+
 
         if (!data.success) {
+
             showToast(
                 data.error || "خطا در افزودن غذا.",
                 "danger"
             );
+
             return;
+
         }
+
+
+
+        // بستن Modal
 
         const modalElement =
-            document.getElementById("addFoodModal");
+            document.getElementById(
+                "addFoodModal"
+            );
+
 
         if (modalElement) {
+
             const modal =
-                bootstrap.Modal.getInstance(modalElement);
+                bootstrap.Modal.getInstance(
+                    modalElement
+                );
+
+
             if (modal) {
+
                 modal.hide();
+
             }
+
         }
 
+
+
+        // پاک کردن فرم
+
         nameInput.value = "";
+
         priceInput.value = "";
+
         stockInput.value = "";
+
+
+        if(imageInput){
+
+            imageInput.value = "";
+
+        }
+
+
 
         await loadFoods();
 
-        showToast("غذا با موفقیت اضافه شد.", "success");
 
-    } catch (error) {
-        console.error("Create Food Error:", error);
-        showToast("خطا در ارتباط با سرور.", "danger");
+
+        showToast(
+            "غذا با موفقیت اضافه شد.",
+            "success"
+        );
+
+
+
+    } catch(error) {
+
+
+        console.error(
+            "Create Food Error:",
+            error
+        );
+
+
+        showToast(
+            "خطا در ارتباط با سرور.",
+            "danger"
+        );
+
     }
-}
 
+}
 
 // ===============================
 // باز کردن ویرایش غذا
 // ===============================
 
 async function editFood(id) {
+
     try {
-        const response = await fetch(`/api/foods/${id}/`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
-        }
+        const response = await fetch("/api/foods/");
 
-        const food = await response.json();
+        const foods = await response.json();
 
-        if (!food || food.error) {
-            showToast("غذا پیدا نشد.", "danger");
-            return;
-        }
 
-        const idInput =
-            document.getElementById("editFoodId");
-        const nameInput =
-            document.getElementById("editFoodName");
-        const priceInput =
-            document.getElementById("editFoodPrice");
-        const stockInput =
-            document.getElementById("editFoodStock");
+        const food = foods.find(
+            item => item.id === id
+        );
 
-        if (!idInput || !nameInput || !priceInput || !stockInput) {
+
+        if (!food) {
+
             showToast(
-                "فرم ویرایش غذا در HTML وجود ندارد.",
+                "غذا پیدا نشد",
                 "danger"
             );
+
             return;
         }
 
-        idInput.value = food.id;
-        nameInput.value = food.name;
-        priceInput.value = food.price;
-        stockInput.value = food.stock;
 
-        const modalElement =
-            document.getElementById("editFoodModal");
+        document.getElementById("editFoodId").value = food.id;
+        document.getElementById("editFoodName").value = food.name;
+        document.getElementById("editFoodPrice").value = food.price;
+        document.getElementById("editFoodStock").value = food.stock;
 
-        if (!modalElement) {
-            showToast("پنجره ویرایش غذا پیدا نشد.", "danger");
-            return;
-        }
 
         const modal =
-            bootstrap.Modal.getOrCreateInstance(modalElement);
+            bootstrap.Modal.getOrCreateInstance(
+                document.getElementById("editFoodModal")
+            );
+
 
         modal.show();
 
-    } catch (error) {
-        console.error("Edit Food Error:", error);
-        showToast("خطا در دریافت اطلاعات غذا.", "danger");
+
+    } catch(error){
+
+        console.error(error);
+
+        showToast(
+            "خطا در دریافت غذا",
+            "danger"
+        );
     }
 }
 
