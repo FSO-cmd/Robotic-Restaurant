@@ -601,170 +601,129 @@ function renderCart() {
 
 async function submitOrder() {
 
-
     const table =
-        document.getElementById(
-            "tableNumber"
-        ).value;
+        document.getElementById("tableNumber").value;
 
+    // -----------------------------
+    // بررسی میز
+    // -----------------------------
 
-
-    if(table === "") {
-
+    if (table === "") {
 
         alert(
             "ابتدا شماره میز را انتخاب کنید."
         );
 
-
         return;
-
     }
 
+    // -----------------------------
+    // بررسی سبد خرید
+    // -----------------------------
 
-
-
-    if(cart.length === 0) {
-
+    if (cart.length === 0) {
 
         alert(
             "سبد خرید خالی است."
         );
 
-
         return;
-
     }
 
-
-
+    // -----------------------------
+    // اطلاعات سفارش
+    // -----------------------------
 
     const order = {
 
+        table: table,
 
-        table:table,
-
-
-        foods:cart,
-
-
-        total:
-        cart.reduce(
-            (sum,item)=>
-            sum +
-            (
-            item.price *
-            item.qty
-            ),
-            0
-        )
-
+        foods: cart
 
     };
 
-
-
-
-
-
     try {
-
-
 
         const response =
             await fetch(
                 "/api/create_order/",
                 {
+                    method: "POST",
 
-                method:"POST",
+                    headers: {
 
+                        "Content-Type":
+                            "application/json",
 
-                headers:{
+                        "X-CSRFToken":
+                            csrftoken
+                    },
 
-
-                    "Content-Type":
-                    "application/json",
-
-
-                    "X-CSRFToken":
-                    csrftoken
-
-
-                },
-
-
-                body:
-                JSON.stringify(order)
-
-
+                    body:
+                        JSON.stringify(order)
                 }
             );
-
-
-
 
 
         const data =
             await response.json();
 
 
+        // -----------------------------
+        // خطای سرور
+        // -----------------------------
 
-
-        if(data.success){
-
-
-
-            alert(
-                "سفارش با موفقیت ثبت شد."
-            );
-
-
-
-            cart=[];
-
-
-
-            saveCart();
-
-
-
-            renderCart();
-
-
-
-        }
-        else{
-
+        if (!response.ok) {
 
             alert(
                 data.error ||
                 "خطا در ثبت سفارش"
             );
 
-
+            return;
         }
 
 
+        // -----------------------------
+        // ثبت موفق سفارش
+        // -----------------------------
+
+        if (data.success) {
+
+            // خالی کردن سبد
+            cart = [];
+
+            saveCart();
+
+            renderCart();
+
+
+            // رفتن به صفحه پیگیری سفارش
+            window.location.href =
+                `/order/${data.order_id}/`;
+
+        }
+
+        else {
+
+            alert(
+                data.error ||
+                "خطا در ثبت سفارش"
+            );
+        }
 
 
     }
-    catch(error){
 
-
+    catch (error) {
 
         console.error(
+            "Submit Order Error:",
             error
         );
-
-
 
         alert(
             "خطا در ارتباط با سرور"
         );
-
-
     }
-
-
-
 }

@@ -18,4 +18,14 @@ urlpatterns = [
     path("api/foods/create/", views.create_food, name="create_food"),
     path("api/foods/<int:id>/update/", views.update_food, name="update_food"),
     path("api/foods/<int:id>/delete/", views.delete_food, name="delete_food"),
+    path(
+        "order/<int:id>/",
+        views.order_tracking,
+        name="order_tracking"
+    ),
+    path(
+        "api/orders/<int:id>/",
+        views.get_order,
+        name="get_order"
+    ),
 ]
