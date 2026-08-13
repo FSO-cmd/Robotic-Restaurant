@@ -29,43 +29,37 @@ class Food(models.Model):
 
 class Order(models.Model):
 
-    STATUS = [
-
-        ("new","جدید"),
-
-        ("accepted","تایید شده"),
-
-        ("cooking","در حال آماده سازی"),
-
-        ("ready","آماده بارگیری"),
-
-        ("sent","ارسال شده"),
-
-        ("done","تحویل شده"),
-
-        ("rejected","رد شده")
-
+    STATUS_CHOICES = [
+        ("new", "جدید"),
+        ("accepted", "تایید شده"),
+        ("cooking", "در حال آماده سازی"),
+        ("ready", "آماده"),
+        ("sent", "ارسال شده"),
+        ("done", "تحویل شده"),
+        ("rejected", "رد شده"),
     ]
 
-    table = models.IntegerField()
+    table = models.CharField(max_length=20)
 
-    total = models.IntegerField()
+    total = models.PositiveIntegerField(default=0)
 
     status = models.CharField(
-
         max_length=20,
-
-        choices=STATUS,
-
+        choices=STATUS_CHOICES,
         default="new"
-
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    cooking_started_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
-
-        return f"Order {self.id}"
+        return f"Order #{self.id}"
 
 
 class OrderItem(models.Model):

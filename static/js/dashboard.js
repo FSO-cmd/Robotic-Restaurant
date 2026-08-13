@@ -267,73 +267,248 @@ function updateCounter() {
 // ===============================
 
 function renderOrders(orders) {
-    const container =
-        document.getElementById("ordersContainer");
 
-    if (!container) {
-        return;
+    const newContainer =
+        document.getElementById(
+            "ordersContainer"
+        );
+
+    const cookingContainer =
+        document.getElementById(
+            "cookingOrdersContainer"
+        );
+
+
+    if (!newContainer) return;
+
+
+    newContainer.innerHTML = "";
+
+
+    if (cookingContainer) {
+        cookingContainer.innerHTML = "";
     }
 
-    container.innerHTML = "";
-
-    if (!orders || orders.length === 0) {
-        container.innerHTML = `
-            <div class="alert alert-light text-center">
-                سفارشی وجود ندارد.
-            </div>
-        `;
-        return;
-    }
 
     orders.forEach(order => {
+
         let foods = "";
 
-        if (order.items && order.items.length > 0) {
+
+        if (order.items) {
+
             order.items.forEach(item => {
+
                 foods += `
-                    <div class="d-flex
-                                justify-content-between
-                                border-bottom
-                                py-1">
-                        <span>🍽 ${item.name}</span>
-                        <span class="badge bg-primary">
-                            ${item.quantity}
-                        </span>
-                    </div>
+                    <p>
+                        🍽 ${item.name}
+                        × ${item.quantity}
+                    </p>
                 `;
+
             });
+
         }
 
-        container.innerHTML += `
-            <div class="order-card new-order">
-                <div class="order-header">
-                    <span>سفارش #${order.id}</span>
-                    <span class="badge bg-warning">جدید</span>
+
+        // =====================================
+        // سفارش جدید
+        // =====================================
+
+        if (order.status === "new") {
+
+            newContainer.innerHTML += `
+
+                <div class="order-card new-order">
+
+                    <div class="order-header">
+
+                        <span>
+                            سفارش #${order.id}
+                        </span>
+
+                        <span class="badge bg-warning">
+                            جدید
+                        </span>
+
+                    </div>
+
+
+                    <div class="order-body">
+
+                        <p>
+                            🍽 میز ${order.table}
+                        </p>
+
+                        ${foods}
+
+
+                        <p>
+                            💰
+                            ${Number(
+                                order.total
+                            ).toLocaleString()}
+                            تومان
+                        </p>
+
+                    </div>
+
+
+                    <div class="order-footer">
+
+                        <button
+                            class="btn btn-success w-100"
+                            onclick="acceptOrder(${order.id})">
+
+                            <i class="bi bi-check-lg"></i>
+
+                            تأیید سفارش
+
+                        </button>
+
+
+                        <button
+                            class="btn btn-danger w-100 mt-2"
+                            onclick="rejectOrder(${order.id})">
+
+                            <i class="bi bi-x-lg"></i>
+
+                            رد سفارش
+
+                        </button>
+
+                    </div>
+
                 </div>
-                <div class="order-body">
-                    <p>🍽 میز ${order.table}</p>
-                    ${foods}
-                    <p class="mt-2">
-                        💰 ${Number(order.total).toLocaleString()} تومان
-                    </p>
+
+            `;
+
+        }
+
+
+        // =====================================
+        // در حال آماده سازی
+        // =====================================
+
+        if (order.status === "cooking") {
+
+            if (!cookingContainer) return;
+
+
+            const minutes =
+                Math.floor(
+                    order.remaining_seconds / 60
+                );
+
+            const seconds =
+                order.remaining_seconds % 60;
+
+
+            cookingContainer.innerHTML += `
+
+                <div class="order-card cooking">
+
+                    <div class="order-header">
+
+                        <span>
+                            سفارش #${order.id}
+                        </span>
+
+                        <span class="badge bg-primary">
+
+                            در حال آماده سازی
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="order-body">
+
+                        <p>
+                            🍽 میز ${order.table}
+                        </p>
+
+
+                        ${foods}
+
+
+                        <div class="mt-3">
+
+                            <div class="d-flex
+                                        justify-content-between">
+
+                                <span>
+                                    زمان آماده سازی
+                                </span>
+
+                                <strong>
+
+                                    ${order.progress}%
+
+                                </strong>
+
+                            </div>
+
+
+                            <div class="progress mt-2">
+
+                                <div
+                                    class="progress-bar
+                                           progress-bar-striped
+                                           progress-bar-animated"
+                                    style="
+                                        width:
+                                        ${order.progress}%
+                                    ">
+
+                                    ${order.progress}%
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="text-center mt-2">
+
+                                ⏱
+
+                                ${minutes}:
+                                ${String(seconds).padStart(2, "0")}
+
+                                باقی مانده
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="order-footer">
+
+                        <button
+                            class="btn btn-success w-100"
+                            onclick="
+                                readyOrder(${order.id})
+                            ">
+
+                            <i class="bi bi-check-circle"></i>
+
+                            آماده شد
+
+                        </button>
+
+                    </div>
+
                 </div>
-                <div class="order-footer">
-                    <button
-                        type="button"
-                        class="btn btn-success"
-                        onclick="acceptOrder(${order.id})">
-                        تایید
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-danger"
-                        onclick="rejectOrder(${order.id})">
-                        رد
-                    </button>
-                </div>
-            </div>
-        `;
+
+            `;
+
+        }
+
     });
+
 }
 
 

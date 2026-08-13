@@ -28,4 +28,14 @@ urlpatterns = [
         views.get_order,
         name="get_order"
     ),
+    path(
+        "api/orders/<int:id>/ready/",
+        views.ready_order,
+        name="ready_order"
+    ),
+    path(
+        "api/orders/<int:id>/send/",
+        views.send_order,
+        name="send_order"
+    ),
 ]

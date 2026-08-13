@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db import transaction
+from django.utils import timezone
 
 import json
 
@@ -9,23 +10,31 @@ from .models import Order, OrderItem, Food
 
 
 # =========================================================
-# صفحه مشتری
+# صفحات
 # =========================================================
 
 def customer(request):
     return render(request, "customer.html")
 
 
-# =========================================================
-# داشبورد
-# =========================================================
-
 def dashboard(request):
     return render(request, "dashboard.html")
 
 
+def order_tracking(request, id):
+    order = get_object_or_404(Order, id=id)
+
+    return render(
+        request,
+        "order_tracking.html",
+        {
+            "order": order
+        }
+    )
+
+
 # =========================================================
-# دریافت غذاها
+# غذاها
 # =========================================================
 
 def get_foods(request):
@@ -48,7 +57,7 @@ def get_foods(request):
 
 
 # =========================================================
-# افزودن غذا
+# ایجاد غذا + عکس
 # =========================================================
 
 @csrf_exempt
@@ -76,31 +85,45 @@ def create_food(request):
         # -------------------------
 
         if not name:
-            return JsonResponse({
-                "success": False,
-                "error": "نام غذا وارد نشده است."
-            }, status=400)
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "نام غذا وارد نشده است."
+                },
+                status=400
+            )
 
         try:
             price = int(price)
             stock = int(stock)
-        except ValueError:
-            return JsonResponse({
-                "success": False,
-                "error": "قیمت یا موجودی نامعتبر است."
-            }, status=400)
+
+        except (ValueError, TypeError):
+
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "قیمت یا موجودی نامعتبر است."
+                },
+                status=400
+            )
 
         if price < 0:
-            return JsonResponse({
-                "success": False,
-                "error": "قیمت نمی‌تواند منفی باشد."
-            }, status=400)
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "قیمت نمی‌تواند منفی باشد."
+                },
+                status=400
+            )
 
         if stock < 0:
-            return JsonResponse({
-                "success": False,
-                "error": "موجودی نمی‌تواند منفی باشد."
-            }, status=400)
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "موجودی نمی‌تواند منفی باشد."
+                },
+                status=400
+            )
 
         # -------------------------
         # ایجاد غذا
@@ -113,23 +136,28 @@ def create_food(request):
             image=image
         )
 
-        return JsonResponse({
-            "success": True,
-            "food": {
-                "id": food.id,
-                "name": food.name,
-                "price": food.price,
-                "stock": food.stock,
-                "image": food.image.url if food.image else ""
+        return JsonResponse(
+            {
+                "success": True,
+                "food": {
+                    "id": food.id,
+                    "name": food.name,
+                    "price": food.price,
+                    "stock": food.stock,
+                    "image": food.image.url if food.image else ""
+                }
             }
-        })
+        )
 
     except Exception as e:
 
-        return JsonResponse({
-            "success": False,
-            "error": str(e)
-        }, status=500)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": str(e)
+            },
+            status=500
+        )
 
 
 # =========================================================
@@ -140,10 +168,14 @@ def create_food(request):
 def update_food(request, id):
 
     if request.method != "PUT":
-        return JsonResponse({
-            "success": False,
-            "error": "PUT only"
-        }, status=405)
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "PUT only"
+            },
+            status=405
+        )
 
     try:
 
@@ -151,10 +183,13 @@ def update_food(request, id):
 
     except Food.DoesNotExist:
 
-        return JsonResponse({
-            "success": False,
-            "error": "غذا پیدا نشد."
-        }, status=404)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "غذا پیدا نشد."
+            },
+            status=404
+        )
 
     try:
 
@@ -164,27 +199,53 @@ def update_food(request, id):
         price = data.get("price", food.price)
         stock = data.get("stock", food.stock)
 
+        price = int(price)
+        stock = int(stock)
+
+        if price < 0:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "قیمت نمی‌تواند منفی باشد."
+                },
+                status=400
+            )
+
+        if stock < 0:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "موجودی نمی‌تواند منفی باشد."
+                },
+                status=400
+            )
+
         food.name = name
-        food.price = int(price)
-        food.stock = int(stock)
+        food.price = price
+        food.stock = stock
 
         food.save()
 
-        return JsonResponse({
-            "success": True,
-            "id": food.id,
-            "name": food.name,
-            "price": food.price,
-            "stock": food.stock,
-            "image": food.image.url if food.image else ""
-        })
+        return JsonResponse(
+            {
+                "success": True,
+                "id": food.id,
+                "name": food.name,
+                "price": food.price,
+                "stock": food.stock,
+                "image": food.image.url if food.image else ""
+            }
+        )
 
     except Exception as e:
 
-        return JsonResponse({
-            "success": False,
-            "error": str(e)
-        }, status=400)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": str(e)
+            },
+            status=400
+        )
 
 
 # =========================================================
@@ -195,10 +256,14 @@ def update_food(request, id):
 def delete_food(request, id):
 
     if request.method != "DELETE":
-        return JsonResponse({
-            "success": False,
-            "error": "DELETE only"
-        }, status=405)
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "DELETE only"
+            },
+            status=405
+        )
 
     try:
 
@@ -206,20 +271,26 @@ def delete_food(request, id):
 
     except Food.DoesNotExist:
 
-        return JsonResponse({
-            "success": False,
-            "error": "غذا پیدا نشد."
-        }, status=404)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "غذا پیدا نشد."
+            },
+            status=404
+        )
 
     food.delete()
 
-    return JsonResponse({
-        "success": True
-    })
+    return JsonResponse(
+        {
+            "success": True
+        }
+    )
 
 
 # =========================================================
-# ثبت سفارش + کاهش موجودی
+# ثبت سفارش
+# کاهش موجودی
 # =========================================================
 
 @csrf_exempt
@@ -228,10 +299,13 @@ def create_order(request):
 
     if request.method != "POST":
 
-        return JsonResponse({
-            "success": False,
-            "error": "POST only"
-        }, status=405)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "POST only"
+            },
+            status=405
+        )
 
     try:
 
@@ -246,19 +320,26 @@ def create_order(request):
 
         if not table:
 
-            return JsonResponse({
-                "success": False,
-                "error": "شماره میز مشخص نشده است."
-            }, status=400)
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "شماره میز مشخص نشده است."
+                },
+                status=400
+            )
 
         if not foods:
 
-            return JsonResponse({
-                "success": False,
-                "error": "سبد خرید خالی است."
-            }, status=400)
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "سبد خرید خالی است."
+                },
+                status=400
+            )
 
         total = 0
+
         order_items = []
 
         # -------------------------
@@ -268,14 +349,21 @@ def create_order(request):
         for item in foods:
 
             food_id = item.get("id")
-            quantity = int(item.get("qty", 0))
+
+            try:
+                quantity = int(item.get("qty", 0))
+            except (ValueError, TypeError):
+                quantity = 0
 
             if quantity <= 0:
 
-                return JsonResponse({
-                    "success": False,
-                    "error": "تعداد غذا نامعتبر است."
-                }, status=400)
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "تعداد غذا نامعتبر است."
+                    },
+                    status=400
+                )
 
             try:
 
@@ -285,10 +373,14 @@ def create_order(request):
 
             except Food.DoesNotExist:
 
-                return JsonResponse({
-                    "success": False,
-                    "error": f"غذا با شناسه {food_id} پیدا نشد."
-                }, status=404)
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error":
+                            f"غذا با شناسه {food_id} پیدا نشد."
+                    },
+                    status=404
+                )
 
             # -------------------------
             # بررسی موجودی
@@ -296,19 +388,24 @@ def create_order(request):
 
             if food.stock < quantity:
 
-                return JsonResponse({
-                    "success": False,
-                    "error":
-                        f"موجودی «{food.name}» کافی نیست. "
-                        f"موجودی فعلی: {food.stock}"
-                }, status=400)
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error":
+                            f"موجودی «{food.name}» کافی نیست. "
+                            f"موجودی فعلی: {food.stock}"
+                    },
+                    status=400
+                )
 
             total += food.price * quantity
 
-            order_items.append({
-                "food": food,
-                "quantity": quantity
-            })
+            order_items.append(
+                {
+                    "food": food,
+                    "quantity": quantity
+                }
+            )
 
         # -------------------------
         # ایجاد سفارش
@@ -347,35 +444,52 @@ def create_order(request):
         # پاسخ
         # -------------------------
 
-        return JsonResponse({
-            "success": True,
-            "order_id": order.id,
-            "total": total
-        })
+        return JsonResponse(
+            {
+                "success": True,
+                "order_id": order.id,
+                "total": total,
+                "status": "new",
+                "message": "سفارش با موفقیت ثبت شد."
+            }
+        )
 
     except json.JSONDecodeError:
 
-        return JsonResponse({
-            "success": False,
-            "error": "اطلاعات JSON نامعتبر است."
-        }, status=400)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "اطلاعات ارسال‌شده معتبر نیست."
+            },
+            status=400
+        )
 
     except Exception as e:
 
-        return JsonResponse({
-            "success": False,
-            "error": str(e)
-        }, status=500)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": str(e)
+            },
+            status=500
+        )
 
 
 # =========================================================
-# دریافت سفارش‌های جدید
+# دریافت سفارش‌ها برای داشبورد
 # =========================================================
 
 def get_orders(request):
 
     orders = Order.objects.filter(
-        status="new"
+        status__in=[
+            "new",
+            "cooking",
+            "ready",
+            "sent",
+            "done",
+            "rejected"
+        ]
     ).order_by("-id")
 
     result = []
@@ -386,19 +500,69 @@ def get_orders(request):
 
         for item in order.items.all():
 
-            items.append({
-                "name": item.name,
-                "quantity": item.quantity,
-                "price": item.price
-            })
+            items.append(
+                {
+                    "name": item.name,
+                    "quantity": item.quantity,
+                    "price": item.price
+                }
+            )
 
-        result.append({
-            "id": order.id,
-            "table": order.table,
-            "status": order.status,
-            "total": order.total,
-            "items": items
-        })
+        # -------------------------
+        # محاسبه پیشرفت آماده‌سازی
+        # -------------------------
+
+        progress = 0
+        remaining_seconds = 0
+
+        if (
+            order.status == "cooking"
+            and order.cooking_started_at
+        ):
+
+            elapsed = (
+                timezone.now()
+                - order.cooking_started_at
+            ).total_seconds()
+
+            total_time = 5 * 60
+
+            progress = min(
+                int(
+                    (elapsed / total_time)
+                    * 100
+                ),
+                100
+            )
+
+            remaining_seconds = max(
+                int(total_time - elapsed),
+                0
+            )
+
+        elif order.status in [
+            "ready",
+            "sent",
+            "done"
+        ]:
+
+            progress = 100
+
+        result.append(
+            {
+                "id": order.id,
+                "table": order.table,
+                "status": order.status,
+                "total": order.total,
+
+                "progress": progress,
+
+                "remaining_seconds":
+                    remaining_seconds,
+
+                "items": items
+            }
+        )
 
     return JsonResponse(
         result,
@@ -408,10 +572,21 @@ def get_orders(request):
 
 # =========================================================
 # تایید سفارش
+# شروع آماده‌سازی
 # =========================================================
 
 @csrf_exempt
 def accept_order(request, id):
+
+    if request.method != "POST":
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "POST only"
+            },
+            status=405
+        )
 
     try:
 
@@ -419,20 +594,48 @@ def accept_order(request, id):
 
     except Order.DoesNotExist:
 
-        return JsonResponse({
-            "success": False,
-            "error": "سفارش پیدا نشد."
-        }, status=404)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "سفارش پیدا نشد."
+            },
+            status=404
+        )
 
-    order.status = "accepted"
+    # اگر سفارش قبلاً رد یا تکمیل شده باشد
+    if order.status != "new":
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "این سفارش قابل تایید نیست."
+            },
+            status=400
+        )
+
+    # -------------------------
+    # شروع آماده‌سازی
+    # -------------------------
+
+    order.status = "cooking"
+
+    order.cooking_started_at = timezone.now()
 
     order.save(
-        update_fields=["status"]
+        update_fields=[
+            "status",
+            "cooking_started_at"
+        ]
     )
 
-    return JsonResponse({
-        "success": True
-    })
+    return JsonResponse(
+        {
+            "success": True,
+            "status": "cooking",
+            "message":
+                "سفارش تایید شد و وارد مرحله آماده‌سازی شد."
+        }
+    )
 
 
 # =========================================================
@@ -442,16 +645,40 @@ def accept_order(request, id):
 @csrf_exempt
 def reject_order(request, id):
 
+    if request.method != "POST":
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "POST only"
+            },
+            status=405
+        )
+
     try:
 
         order = Order.objects.get(id=id)
 
     except Order.DoesNotExist:
 
-        return JsonResponse({
-            "success": False,
-            "error": "سفارش پیدا نشد."
-        }, status=404)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "سفارش پیدا نشد."
+            },
+            status=404
+        )
+
+    if order.status != "new":
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error":
+                    "این سفارش دیگر قابل رد کردن نیست."
+            },
+            status=400
+        )
 
     order.status = "rejected"
 
@@ -459,45 +686,282 @@ def reject_order(request, id):
         update_fields=["status"]
     )
 
-    return JsonResponse({
-        "success": True
-    })
-
-
-# =========================================================
-# صفحه پیگیری سفارش
-# =========================================================
-
-def order_tracking(request, id):
-
-    order = get_object_or_404(
-        Order,
-        id=id
-    )
-
-    return render(
-        request,
-        "order_tracking.html",
+    return JsonResponse(
         {
-            "order": order
+            "success": True,
+            "status": "rejected",
+            "message":
+                "سفارش توسط رستوران رد شد."
         }
     )
 
 
 # =========================================================
-# دریافت وضعیت سفارش
+# آماده شدن سفارش
+# =========================================================
+
+@csrf_exempt
+def ready_order(request, id):
+
+    if request.method != "POST":
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "POST only"
+            },
+            status=405
+        )
+
+    try:
+
+        order = Order.objects.get(id=id)
+
+    except Order.DoesNotExist:
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "سفارش پیدا نشد."
+            },
+            status=404
+        )
+
+    if order.status != "cooking":
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error":
+                    "این سفارش در حال آماده‌سازی نیست."
+            },
+            status=400
+        )
+
+    order.status = "ready"
+
+    order.save(
+        update_fields=["status"]
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "status": "ready",
+            "message":
+                "سفارش آماده شد."
+        }
+    )
+
+
+# =========================================================
+# ارسال سفارش به ربات
+# =========================================================
+
+@csrf_exempt
+def send_order(request, id):
+
+    if request.method != "POST":
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "POST only"
+            },
+            status=405
+        )
+
+    try:
+
+        order = Order.objects.get(id=id)
+
+    except Order.DoesNotExist:
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "سفارش پیدا نشد."
+            },
+            status=404
+        )
+
+    if order.status != "ready":
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error":
+                    "سفارش هنوز آماده ارسال نیست."
+            },
+            status=400
+        )
+
+    order.status = "sent"
+
+    order.save(
+        update_fields=["status"]
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "status": "sent",
+            "message":
+                "سفارش برای ربات ارسال شد."
+        }
+    )
+
+
+# =========================================================
+# دریافت اطلاعات یک سفارش
+# برای صفحه Tracking مشتری
 # =========================================================
 
 def get_order(request, id):
 
-    order = get_object_or_404(
-        Order,
-        id=id
+    try:
+
+        order = Order.objects.get(id=id)
+
+    except Order.DoesNotExist:
+
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "سفارش پیدا نشد."
+            },
+            status=404
+        )
+
+    # -------------------------
+    # محاسبه پیشرفت
+    # -------------------------
+
+    progress = 0
+    remaining_seconds = 0
+
+    if (
+        order.status == "cooking"
+        and order.cooking_started_at
+    ):
+
+        elapsed = (
+            timezone.now()
+            - order.cooking_started_at
+        ).total_seconds()
+
+        total_time = 5 * 60
+
+        progress = min(
+            int(
+                (elapsed / total_time)
+                * 100
+            ),
+            100
+        )
+
+        remaining_seconds = max(
+            int(total_time - elapsed),
+            0
+        )
+
+    elif order.status in [
+        "ready",
+        "sent",
+        "done"
+    ]:
+
+        progress = 100
+
+    # -------------------------
+    # مراحل سفارش
+    # -------------------------
+
+    steps = [
+        {
+            "key": "new",
+            "title": "ثبت سفارش"
+        },
+        {
+            "key": "cooking",
+            "title": "تأیید و آماده‌سازی"
+        },
+        {
+            "key": "ready",
+            "title": "آماده"
+        },
+        {
+            "key": "sent",
+            "title": "ارسال با ربات"
+        },
+        {
+            "key": "done",
+            "title": "تحویل شد"
+        }
+    ]
+
+    status_order = [
+        "new",
+        "cooking",
+        "ready",
+        "sent",
+        "done"
+    ]
+
+    current_index = (
+        status_order.index(order.status)
+        if order.status in status_order
+        else -1
     )
 
-    return JsonResponse({
-        "id": order.id,
-        "status": order.status,
-        "table": order.table,
-        "total": order.total
-    })
+    for index, step in enumerate(steps):
+
+        step["completed"] = (
+            current_index >= index
+        )
+
+        step["current"] = (
+            current_index == index
+        )
+
+    # -------------------------
+    # آیتم‌های سفارش
+    # -------------------------
+
+    items = []
+
+    for item in order.items.all():
+
+        items.append(
+            {
+                "name": item.name,
+                "quantity": item.quantity,
+                "price": item.price
+            }
+        )
+
+    return JsonResponse(
+        {
+            "success": True,
+
+            "id": order.id,
+
+            "table": order.table,
+
+            "status": order.status,
+
+            "total": order.total,
+
+            "progress": progress,
+
+            "remaining_seconds":
+                remaining_seconds,
+
+            "steps": steps,
+
+            "items": items,
+
+            "rejected":
+                order.status == "rejected"
+        }
+    )
