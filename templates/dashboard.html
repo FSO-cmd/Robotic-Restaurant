@@ -1,826 +1,445 @@
 {% load static %}
-
 <!DOCTYPE html>
-
 <html lang="fa" dir="rtl">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>پنل فیدر | ربات حمل غذا</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 
-```
-<meta charset="UTF-8">
+    <style>
+        /* =====================================================
+           استایل‌های تم صنعتی (Industrial Theme)
+        ===================================================== */
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --border-color: #333333;
+            --accent-color: #ff6b00; /* نارنجی صنعتی */
+            --text-main: #e0e0e0;
+            --text-muted: #9e9e9e;
+        }
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1">
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, sans-serif;
+        }
 
-<title>پنل فیدر | ربات حمل غذا</title>
+        /* نوار بالایی (Navbar) */
+        .industrial-header {
+            background-color: var(--panel-bg);
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            padding: 15px 20px;
+        }
 
-<link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
-    rel="stylesheet">
+        /* منوی همبرگری (Offcanvas) */
+        .offcanvas {
+            background-color: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+        }
+        .offcanvas-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        /* دکمه‌های منو */
+        .nav-pills .nav-link {
+            color: var(--text-main);
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .nav-pills .nav-link:hover {
+            background-color: rgba(255, 107, 0, 0.1);
+            border-color: var(--accent-color);
+        }
+        .nav-pills .nav-link.active {
+            background-color: var(--accent-color);
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.4);
+        }
 
-<link
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-    rel="stylesheet">
+        /* کارت‌ها و پنل‌ها */
+        .card, .status-card, .robot-panel, .food-stock {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .status-card {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-right: 4px solid var(--accent-color);
+            margin-bottom: 15px;
+        }
+        
+        .status-card i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
 
-<link
-    rel="stylesheet"
-    href="{% static 'css/dashboard.css' %}">
-```
+        .section-title {
+            color: var(--accent-color);
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
 
+        /* جداول */
+        .table {
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        th {
+            background-color: #2a2a2a !important;
+            color: var(--accent-color) !important;
+        }
+
+        /* مودال‌ها */
+        .modal-content {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--accent-color);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+        .form-control {
+            background-color: #2a2a2a;
+            border: 1px solid var(--border-color);
+            color: #fff;
+        }
+        .form-control:focus {
+            background-color: #333;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 5px rgba(255, 107, 0, 0.5);
+            color: #fff;
+        }
+
+        /* دکمه همبرگری */
+        .btn-hamburger {
+            background: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 5px 12px;
+            font-size: 1.5rem;
+            transition: 0.3s;
+        }
+        .btn-hamburger:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- =====================================================
-     Header
-===================================================== -->
-
-<header class="header">
-
-```
-<div class="container-fluid">
-
-    <div class="row align-items-center">
-
-        <div class="col-lg-4">
-
-            <h2>
-
-                <i class="bi bi-cpu-fill"></i>
-
+<header class="industrial-header sticky-top">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+        
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn-hamburger" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainMenuOffcanvas" aria-controls="mainMenuOffcanvas">
+                <i class="bi bi-list"></i>
+            </button>
+            
+            <h4 class="mb-0" style="color: var(--text-main);">
+                <i class="bi bi-cpu-fill text-warning"></i>
                 پنل مدیریت فیدر
-
-            </h2>
-
-            <p>
-
-                کنترل سفارش‌ها و ارسال به ربات
-
-            </p>
-
+            </h4>
         </div>
-
-
-        <div class="col-lg-8 text-start">
-
-            <div class="status-group">
-
-
-                <!-- ربات -->
-
-                <div class="status-card">
-
-                    <i class="bi bi-robot"></i>
-
-                    <span>
-                        ربات
-                    </span>
-
-                    <b class="text-success">
-                        آماده
-                    </b>
-
-                </div>
-
-
-                <!-- فیدر -->
-
-                <div class="status-card">
-
-                    <i class="bi bi-box-seam"></i>
-
-                    <span>
-                        فیدر
-                    </span>
-
-                    <b class="text-success">
-                        آماده بارگیری
-                    </b>
-
-                </div>
-
-
-                <!-- باتری -->
-
-                <div class="status-card">
-
-                    <i class="bi bi-battery-half"></i>
-
-                    <span>
-                        باتری
-                    </span>
-
-                    <b>
-                        91%
-                    </b>
-
-                </div>
-
-
-                <!-- سفارش فعال -->
-
-                <div class="status-card">
-
-                    <i class="bi bi-list-check"></i>
-
-                    <span>
-                        سفارش فعال
-                    </span>
-
-                    <b id="activeOrdersCount">
-                        0
-                    </b>
-
-                </div>
-
-
-            </div>
-
+        
+        <div class="d-none d-md-block text-muted">
+            کنترل سفارش‌ها و ارسال به ربات
         </div>
-
     </div>
-
-</div>
-```
-
 </header>
 
-<!-- =====================================================
-     Dashboard
-===================================================== -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mainMenuOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title text-warning"><i class="bi bi-gear-fill"></i> کنترل پنل صنعتی</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    
+    <div class="offcanvas-body">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <button class="nav-link active text-start" id="nav-dashboard-tab" data-bs-toggle="pill" data-bs-target="#nav-dashboard" type="button" role="tab" aria-controls="nav-dashboard" aria-selected="true">
+                <i class="bi bi-speedometer2 me-2"></i> داشبورد و سفارشات
+            </button>
+            
+            <button class="nav-link text-start" id="nav-robot-tab" data-bs-toggle="pill" data-bs-target="#nav-robot" type="button" role="tab" aria-controls="nav-robot" aria-selected="false">
+                <i class="bi bi-robot me-2"></i> وضعیت ربات
+            </button>
+            
+            <button class="nav-link text-start" id="nav-menu-tab" data-bs-toggle="pill" data-bs-target="#nav-menu" type="button" role="tab" aria-controls="nav-menu" aria-selected="false">
+                <i class="bi bi-egg-fried me-2"></i> مدیریت منو و فیدر
+            </button>
+        </div>
+    </div>
+</div>
 
 <div class="container-fluid mt-4">
+    <div class="tab-content" id="v-pills-tabContent">
 
-```
-<div class="row">
+        <div class="tab-pane fade show active" id="nav-dashboard" role="tabpanel" aria-labelledby="nav-dashboard-tab">
+            
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="status-card">
+                        <div>
+                            <i class="bi bi-robot"></i> <span class="ms-2">ربات</span>
+                        </div>
+                        <b class="text-success">آماده</b>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="status-card">
+                        <div>
+                            <i class="bi bi-box-seam"></i> <span class="ms-2">فیدر</span>
+                        </div>
+                        <b class="text-warning">آماده بارگیری</b>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="status-card">
+                        <div>
+                            <i class="bi bi-battery-half"></i> <span class="ms-2">باتری</span>
+                        </div>
+                        <b class="text-info">91%</b>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="status-card">
+                        <div>
+                            <i class="bi bi-list-check"></i> <span class="ms-2">سفارش فعال</span>
+                        </div>
+                        <b id="activeOrdersCount" class="text-danger">0</b>
+                    </div>
+                </div>
+            </div>
 
-
-    <!-- =================================================
-         سفارش‌های جدید
-    ================================================= -->
-
-    <div class="col-lg-4">
-
-        <h4 class="section-title">
-
-            <i class="bi bi-bell-fill text-warning"></i>
-
-            سفارش‌های جدید
-
-        </h4>
-
-
-        <div
-            class="order-column"
-            id="ordersContainer">
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =================================================
-         در حال آماده سازی
-    ================================================= -->
-
-    <div class="col-lg-4">
-
-        <h4 class="section-title">
-
-            <i class="bi bi-fire text-danger"></i>
-
-            در حال آماده سازی
-
-        </h4>
-        
-         <div
-            class="order-column"
-            id="cookingOrdersContainer">
-        
-         </div>
-
-    </div>
-
-
-
-    <!-- =================================================
-         وضعیت ربات
-    ================================================= -->
-
-    <div class="col-lg-4">
-
-        <h4 class="section-title">
-
-            <i class="bi bi-robot"></i>
-
-            وضعیت ربات
-
-        </h4>
-
-
-        <div class="robot-panel">
-
-            <div class="robot-status">
-
-
-                <div class="robot-icon">
-                    🤖
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card p-3 h-100">
+                        <h4 class="section-title">
+                            <i class="bi bi-bell-fill text-warning"></i> سفارش‌های جدید
+                        </h4>
+                        <div class="order-column" id="ordersContainer">
+                            </div>
+                    </div>
                 </div>
 
-
-                <h5>
-                    Robot-01
-                </h5>
-
-
-                <p>
-
-                    وضعیت:
-
-                    <span class="text-success">
-                        آماده
-                    </span>
-
-                </p>
-
-
-                <p>
-
-                    مقصد:
-
-                    -
-
-                </p>
-
-
-                <p>
-
-                    باتری:
-
-                    91%
-
-                </p>
-
-
-                <hr>
-
-
-                <h6>
-                    آخرین تحویل‌ها
-                </h6>
-
-
-                <ul class="list-group">
-
-                    <li class="list-group-item">
-
-                        سفارش 115
-
-                        <span>
-                            میز 2
-                        </span>
-
-                    </li>
-
-
-                    <li class="list-group-item">
-
-                        سفارش 116
-
-                        <span>
-                            میز 5
-                        </span>
-
-                    </li>
-
-
-                    <li class="list-group-item">
-
-                        سفارش 117
-
-                        <span>
-                            میز 3
-                        </span>
-
-                    </li>
-
-                </ul>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-<!-- =================================================
-     مدیریت منوی غذا
-================================================= -->
-
-<div class="row mt-5">
-
-    <div class="col-12">
-
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-
-            <h4 class="section-title mb-0">
-
-                <i class="bi bi-egg-fried"></i>
-
-                مدیریت منوی غذا
-
-            </h4>
-
-
-            <button
-                class="btn btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#addFoodModal">
-
-                <i class="bi bi-plus-lg"></i>
-
-                افزودن غذا
-
-            </button>
-
-        </div>
-
-
-
-        <!-- جدول غذاها -->
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <div class="table-responsive">
-
-                    <table class="table table-hover align-middle text-center">
-
-                        <thead>
-
-                            <tr>
-                                <th>
-                                    تصویر
-                                </th>
-                                
-                                <th>
-                                    نام غذا
-                                </th>
-
-                                <th>
-                                    قیمت
-                                </th>
-
-                                <th>
-                                    موجودی
-                                </th>
-                                <div class="mb-3">
-
-                                <label class="form-label">
-                                    تصویر غذا
-                                </label>
-                                
-                                
-                                <input
-                                type="file"
-                                id="foodImage"
-                                class="form-control"
-                                accept="image/*">
-                                
-                                </div>
-
-                                <th>
-                                    وضعیت
-                                </th>
-
-                                <th>
-                                    عملیات
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="foodsContainer">
-
-                            <!-- JavaScript -->
-
-                        </tbody>
-
-                    </table>
-
+                <div class="col-lg-6 mb-4">
+                    <div class="card p-3 h-100">
+                        <h4 class="section-title">
+                            <i class="bi bi-fire text-danger"></i> در حال آماده سازی
+                        </h4>
+                        <div class="order-column" id="cookingOrdersContainer">
+                            </div>
+                    </div>
                 </div>
+            </div>
+        </div>
 
+        <div class="tab-pane fade" id="nav-robot" role="tabpanel" aria-labelledby="nav-robot-tab">
+            <div class="row">
+                <div class="col-lg-6 mx-auto">
+                    <div class="card p-4 robot-panel">
+                        <h4 class="section-title">
+                            <i class="bi bi-robot"></i> مانیتورینگ ربات
+                        </h4>
+                        
+                        <div class="robot-status text-center mb-4">
+                            <div class="robot-icon" style="font-size: 4rem;">🤖</div>
+                            <h5 class="text-warning mt-2">Robot-01</h5>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>وضعیت:</span>
+                            <span class="text-success fw-bold">آماده</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>مقصد:</span>
+                            <span class="text-light">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span>باتری:</span>
+                            <span class="text-info fw-bold">91%</span>
+                        </div>
+
+                        <hr style="border-color: var(--border-color);">
+
+                        <h6 class="text-muted mb-3">آخرین تحویل‌ها</h6>
+                        <ul class="list-group list-group-flush bg-transparent">
+                            <li class="list-group-item bg-transparent text-light d-flex justify-content-between border-secondary">
+                                سفارش 115 <span>میز 2</span>
+                            </li>
+                            <li class="list-group-item bg-transparent text-light d-flex justify-content-between border-secondary">
+                                سفارش 116 <span>میز 5</span>
+                            </li>
+                            <li class="list-group-item bg-transparent text-light d-flex justify-content-between border-secondary">
+                                سفارش 117 <span>میز 3</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="nav-menu" role="tabpanel" aria-labelledby="nav-menu-tab">
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="section-title mb-0 border-0">
+                    <i class="bi bi-tools"></i> مدیریت منوی غذا
+                </h4>
+                <button class="btn btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#addFoodModal">
+                    <i class="bi bi-plus-lg"></i> افزودن غذا
+                </button>
+            </div>
+
+            <div class="card shadow-sm mb-5">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th>تصویر</th>
+                                    <th>نام غذا</th>
+                                    <th>قیمت</th>
+                                    <th>موجودی</th>
+                                    <th>وضعیت</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="foodsContainer">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card p-3 food-stock">
+                        <h5 class="section-title border-0">
+                            <i class="bi bi-box-fill"></i> موجودی فیدر
+                        </h5>
+                        <div id="foodStockContainer">
+                            </div>
+                    </div>
+                </div>
             </div>
 
         </div>
 
     </div>
-
 </div>
 
-
-
-<!-- =================================================
-     موجودی فیدر
-================================================= -->
-
-<div class="row mt-4">
-
-    <div class="col-lg-6">
-
-        <div class="food-stock">
-
-            <h5>
-
-                📦 موجودی فیدر
-
-            </h5>
-
-
-            <div id="foodStockContainer">
-
-
-                <!-- JavaScript -->
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-```
-
-</div>
-
-<!-- =====================================================
-     Modal افزودن غذا
-===================================================== -->
-
-<div
-    class="modal fade"
-    id="addFoodModal"
-    tabindex="-1"
-    aria-hidden="true">
-
-```
-<div class="modal-dialog">
-
-    <div class="modal-content">
-
-
-        <div class="modal-header">
-
-            <h5 class="modal-title">
-
-                <i class="bi bi-plus-circle"></i>
-
-                افزودن غذای جدید
-
-            </h5>
-
-
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal">
-
-            </button>
-
-        </div>
-
-
-
-        <div class="modal-body">
-
-
-            <!-- نام -->
-
-            <div class="mb-3">
-
-                <label class="form-label">
-
-                    نام غذا
-
-                </label>
-
-
-                <input
-                    type="text"
-                    id="foodName"
-                    class="form-control"
-                    placeholder="مثلاً کباب">
-
-            </div>
-
-
-
-            <!-- قیمت -->
-
-            <div class="mb-3">
-
-                <label class="form-label">
-
-                    قیمت
-
-                </label>
-
-
-                <input
-                    type="number"
-                    id="foodPrice"
-                    class="form-control"
-                    placeholder="مثلاً 250000">
-
-            </div>
-
-
-
-            <!-- موجودی -->
-
-            <div class="mb-3">
-
-                <label class="form-label">
-
-                    موجودی
-
-                </label>
-
-
-                <input
-                    type="number"
-                    id="foodStock"
-                    class="form-control"
-                    placeholder="مثلاً 20"
-                    min="0">
-
-            </div>
-
-
-        </div>
-
-
-
-        <div class="modal-footer">
-
-
-            <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal">
-
-                لغو
-
-            </button>
-
-
-            <button
-                type="button"
-                class="btn btn-success"
-                onclick="createFood()">
-
-                <i class="bi bi-check-lg"></i>
-
-                افزودن غذا
-
-            </button>
-
-
-        </div>
-
-    </div>
-
-</div>
-```
-
-</div>
-```html
-<!-- =====================================================
-     Modal ویرایش غذا
-===================================================== -->
-
-<div
-    class="modal fade"
-    id="editFoodModal"
-    tabindex="-1"
-    aria-hidden="true">
-
-    <div class="modal-dialog">
-
+<div class="modal fade" id="addFoodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-
             <div class="modal-header">
-
-                <h5 class="modal-title">
-
-                    <i class="bi bi-pencil-square"></i>
-
-                    ویرایش غذا
-
-                </h5>
-
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal">
-                </button>
-
+                <h5 class="modal-title text-warning"><i class="bi bi-plus-circle"></i> افزودن غذای جدید</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
-
             <div class="modal-body">
-
-                <!-- ID غذا -->
-
-                <input
-                    type="hidden"
-                    id="editFoodId">
-
-
-                <!-- نام غذا -->
-
                 <div class="mb-3">
-
-                    <label class="form-label">
-
-                        نام غذا
-
-                    </label>
-
-                    <input
-                        type="text"
-                        id="editFoodName"
-                        class="form-control">
-
+                    <label class="form-label">تصویر غذا</label>
+                    <input type="file" id="foodImage" class="form-control" accept="image/*">
                 </div>
-
-
-                <!-- قیمت -->
-
                 <div class="mb-3">
-
-                    <label class="form-label">
-
-                        قیمت
-
-                    </label>
-
-                    <input
-                        type="number"
-                        id="editFoodPrice"
-                        class="form-control"
-                        min="0">
-
+                    <label class="form-label">نام غذا</label>
+                    <input type="text" id="foodName" class="form-control" placeholder="مثلاً کباب">
                 </div>
-
-
-                <!-- موجودی -->
-
                 <div class="mb-3">
-
-                    <label class="form-label">
-
-                        موجودی
-
-                    </label>
-
-                    <input
-                        type="number"
-                        id="editFoodStock"
-                        class="form-control"
-                        min="0">
-
+                    <label class="form-label">قیمت</label>
+                    <input type="number" id="foodPrice" class="form-control" placeholder="مثلاً 250000">
                 </div>
-
+                <div class="mb-3">
+                    <label class="form-label">موجودی</label>
+                    <input type="number" id="foodStock" class="form-control" placeholder="مثلاً 20" min="0">
+                </div>
             </div>
-
-
             <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal">
-
-                    لغو
-
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لغو</button>
+                <button type="button" class="btn btn-warning text-dark fw-bold" onclick="createFood()">
+                    <i class="bi bi-check-lg"></i> افزودن غذا
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    onclick="updateFood()">
-
-                    <i class="bi bi-check-lg"></i>
-
-                    ذخیره تغییرات
-
+<div class="modal fade" id="editFoodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-warning"><i class="bi bi-pencil-square"></i> ویرایش غذا</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editFoodId">
+                <div class="mb-3">
+                    <label class="form-label">نام غذا</label>
+                    <input type="text" id="editFoodName" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">قیمت</label>
+                    <input type="number" id="editFoodPrice" class="form-control" min="0">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">موجودی</label>
+                    <input type="number" id="editFoodStock" class="form-control" min="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لغو</button>
+                <button type="button" class="btn btn-warning text-dark fw-bold" onclick="updateFood()">
+                    <i class="bi bi-check-lg"></i> ذخیره تغییرات
                 </button>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
-```
 
-<!-- =====================================================
-     Modal ارسال به ربات
-===================================================== -->
-
-<div
-    class="modal fade"
-    id="robotModal"
-    tabindex="-1">
-
-```
-<div class="modal-dialog">
-
-    <div class="modal-content">
-
-
-        <div class="modal-header">
-
-            <h5>
-
-                ارسال سفارش
-
-            </h5>
-
-        </div>
-
-
-        <div class="modal-body">
-
-            <p>
-
-                غذا داخل فیدر قرار گرفته است؟
-
-            </p>
-
-
-            <div class="alert alert-info">
-
-                پس از تایید، اطلاعات سفارش برای ربات ارسال می‌شود.
-
+<div class="modal fade" id="robotModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="text-warning"><i class="bi bi-send-fill"></i> ارسال سفارش</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
+            <div class="modal-body">
+                <p class="fs-5">غذا داخل فیدر قرار گرفته است؟</p>
+                <div class="alert alert-dark border-warning text-warning">
+                    پس از تایید، اطلاعات سفارش برای ربات ارسال می‌شود.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">خیر</button>
+                <button class="btn btn-success" onclick="sendRobot()">بله، ارسال شود</button>
+            </div>
         </div>
-
-
-        <div class="modal-footer">
-
-
-            <button
-                class="btn btn-secondary"
-                data-bs-dismiss="modal">
-
-                خیر
-
-            </button>
-
-
-            <button
-                class="btn btn-success"
-                onclick="sendRobot()">
-
-                بله، ارسال شود
-
-            </button>
-
-
-        </div>
-
     </div>
-
-</div>
-```
-
 </div>
 
-<!-- =====================================================
-     JavaScript
-===================================================== -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-</script>
-
-<script
-    src="{% static 'js/dashboard.js' %}">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
 
 </body>
-
 </html>
