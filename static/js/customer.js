@@ -53,7 +53,7 @@ const csrftoken = getCookie("csrftoken");
 // ==========================
 // Cart
 // ==========================
-
+let menuData = [];
 
 let cart = [];
 
@@ -117,48 +117,25 @@ async function loadFoods() {
 
 
         const response =
-            await fetch("/api/foods/");
+        await fetch("/api/foods/");
+
+
+        menuData =
+        await response.json();
 
 
 
-        const foods =
-            await response.json();
+        if(!menuData || menuData.length===0){
 
-
-
-        const container =
             document.getElementById(
                 "menuContainer"
-            );
-
-
-
-        if (!container) {
-
-            return;
-
-        }
-
-
-
-        container.innerHTML = "";
-
-
-
-
-        if (!foods || foods.length === 0) {
-
-
-            container.innerHTML = `
+            ).innerHTML = `
 
             <div class="alert alert-info">
-
-                غذایی موجود نیست
-
+            غذایی موجود نیست
             </div>
 
             `;
-
 
             return;
 
@@ -166,114 +143,20 @@ async function loadFoods() {
 
 
 
+        renderCategories();
 
 
-
-        foods.forEach(food => {
-
-
-
-            container.innerHTML += `
-
-
-            <div class="col-md-6 col-xl-4">
-
-
-                <div class="food-card">
-
-
-
-                    <img
-
-                    src="${food.image}"
-
-                    class="img-fluid"
-
-                    style="
-                    width:100%;
-                    height:220px;
-                    object-fit:cover;
-                    "
-
-                    onerror="
-                    this.src='/static/images/no-food.png'
-                    "
-
-                    >
-
-
-
-
-                    <div class="food-body">
-
-
-                        <h4>
-
-                            ${food.name}
-
-                        </h4>
-
-
-
-
-                        <div class="price">
-
-                            ${Number(food.price)
-                            .toLocaleString()}
-
-                            تومان
-
-                        </div>
-
-
-
-
-                        <button
-
-                        class="btn btn-warning w-100 mt-3"
-
-                        onclick="
-                        addFood(
-                        ${food.id},
-                        '${food.name}',
-                        ${food.price}
-                        )"
-
-                        >
-
-                            افزودن
-
-                        </button>
-
-
-
-                    </div>
-
-
-                </div>
-
-
-            </div>
-
-
-            `;
-
-
-
-        });
-
+        renderFoods(menuData);
 
 
 
     }
-    catch(error) {
-
+    catch(error){
 
         console.error(
             "Load Foods Error:",
             error
         );
-
 
     }
 
@@ -727,3 +610,185 @@ async function submitOrder() {
         );
     }
 }
+
+
+
+
+
+function renderCategories(){
+
+
+    const box =
+    document.getElementById(
+        "categoryContainer"
+    );
+
+
+    if(!box)
+        return;
+
+
+
+    box.innerHTML="";
+
+
+
+    menuData.forEach(cat=>{
+
+
+        box.innerHTML += `
+
+
+        <div
+        class="category-item"
+        onclick="showCategory(${cat.id})">
+
+
+            <div style="font-size:30px">
+
+                ${cat.icon}
+
+            </div>
+
+
+            ${cat.name}
+
+
+        </div>
+
+
+        `;
+
+
+    });
+
+
+}
+
+
+
+
+function renderFoods(data){
+
+
+    const container =
+    document.getElementById(
+        "menuContainer"
+    );
+
+
+    if(!container)
+        return;
+
+
+
+    container.innerHTML="";
+
+
+
+    data.forEach(cat=>{
+
+
+        cat.foods.forEach(food=>{
+
+
+            container.innerHTML += `
+
+
+            <div class="food-card">
+
+
+                <img 
+
+                    src="${food.image || '/static/images/no-food.png'}"
+                    
+                    class="img-fluid"
+                    
+                    onerror="
+                    this.src='/static/images/no-food.png'
+                    "
+                    
+                >
+
+
+                <div class="food-info">
+                    
+                    
+                    <span class="badge bg-secondary">
+                    ${food.category}
+                    </span>
+                    
+                    
+                    <h4>
+                    ${food.name}
+                    </h4>
+                    
+                    
+                    <p>
+                    ${food.description || ""}
+                    </p>
+                    
+                    
+                    <div class="food-price">
+                    
+                    ${food.price.toLocaleString()}
+                    تومان
+                    
+                    </div>
+                    
+                    
+                 </div>
+
+
+
+                <button
+
+                class="add-btn"
+
+                onclick="
+                addFood(
+                ${food.id},
+                '${food.name}',
+                ${food.price}
+                )
+                ">
+
+                +
+
+                </button>
+
+
+            </div>
+
+
+            `;
+
+
+        });
+
+
+    });
+
+
+}
+
+
+
+
+function showCategory(id){
+
+
+    let category =
+    menuData.filter(
+        c=>c.id===id
+    );
+
+
+    renderFoods(category);
+
+
+}
+
+
+
+

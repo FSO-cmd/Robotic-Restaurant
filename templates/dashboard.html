@@ -4,358 +4,768 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>پنل فیدر | ربات حمل غذا</title>
-    
+    <title>پنل مدیریت سفارش‌ها</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 
     <style>
         /* =====================================================
-           استایل‌های تم صنعتی (Industrial Theme)
+           توکن‌های طراحی — سامانه مدیریت سفارش (Commercial Ops UI)
         ===================================================== */
         :root {
-            --bg-color: #121212;
-            --panel-bg: #1e1e1e;
-            --border-color: #333333;
-            --accent-color: #ff6b00; /* نارنجی صنعتی */
-            --text-main: #e0e0e0;
-            --text-muted: #9e9e9e;
+            --ink: #1B1F27;
+            --ink-2: #242A35;
+            --ink-line: rgba(255, 255, 255, 0.09);
+            --ink-muted: #9BA3B4;
+
+            --paper: #F5F2EA;
+            --surface: #FFFFFF;
+            --line: #E6E1D3;
+
+            --text-main: #1B1F27;
+            --text-muted: #6E7180;
+
+            --saffron: #D98E04;
+            --saffron-deep: #AD7104;
+            --saffron-tint: #FBF0D9;
+
+            --basil: #2F6B4F;
+            --basil-tint: #E4F0EA;
+
+            --rust: #C4432B;
+            --rust-tint: #FAE7E2;
+
+            --slate: #3E6FA6;
+            --slate-tint: #E7EFF7;
+
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow-card: 0 1px 2px rgba(27, 31, 39, 0.04), 0 8px 24px -12px rgba(27, 31, 39, 0.12);
+        }
+
+        * { font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif; }
+        .mono, .stat-value, .order-id, .order-price, .time-chip, .food-price-cell {
+            font-family: 'JetBrains Mono', 'Vazirmatn', monospace;
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--paper);
             color: var(--text-main);
-            font-family: system-ui, -apple-system, sans-serif;
         }
 
-        /* نوار بالایی (Navbar) */
-        .industrial-header {
-            background-color: var(--panel-bg);
-            border-bottom: 2px solid var(--accent-color);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            padding: 15px 20px;
+        a { text-decoration: none; }
+
+        /* =====================================================
+           نوار بالایی
+        ===================================================== */
+        .app-header {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--line);
+            padding: 16px 24px;
         }
 
-        /* منوی همبرگری (Offcanvas) */
-        .offcanvas {
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--border-color);
-        }
-        .offcanvas-header {
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        /* دکمه‌های منو */
-        .nav-pills .nav-link {
-            color: var(--text-main);
-            border-radius: 4px;
-            margin-bottom: 8px;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-        }
-        .nav-pills .nav-link:hover {
-            background-color: rgba(255, 107, 0, 0.1);
-            border-color: var(--accent-color);
-        }
-        .nav-pills .nav-link.active {
-            background-color: var(--accent-color);
-            color: #fff;
-            font-weight: bold;
-            box-shadow: 0 0 10px rgba(255, 107, 0, 0.4);
-        }
-
-        /* کارت‌ها و پنل‌ها */
-        .card, .status-card, .robot-panel, .food-stock {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-main);
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .status-card {
-            padding: 15px;
+        .app-header .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(155deg, var(--saffron) 0%, var(--saffron-deep) 100%);
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            border-right: 4px solid var(--accent-color);
-            margin-bottom: 15px;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.15rem;
+            flex-shrink: 0;
         }
-        
-        .status-card i {
-            font-size: 1.5rem;
-            color: var(--accent-color);
+
+        .app-header h4 {
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: var(--text-main);
         }
+
+        .app-header .subtitle {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--basil);
+            background: var(--basil-tint);
+            padding: 6px 12px;
+            border-radius: 999px;
+        }
+        .live-pill .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--basil);
+            box-shadow: 0 0 0 0 rgba(47,107,79,.5);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0% { box-shadow: 0 0 0 0 rgba(47,107,79,.45); }
+            70% { box-shadow: 0 0 0 7px rgba(47,107,79,0); }
+            100% { box-shadow: 0 0 0 0 rgba(47,107,79,0); }
+        }
+
+        /* دکمه همبرگری (فقط موبایل/تبلت) */
+        .btn-hamburger {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: 0.2s;
+        }
+        .btn-hamburger:hover { background: var(--paper); border-color: var(--saffron); color: var(--saffron); }
+
+        /* =====================================================
+           سایدبار ثابت (دسکتاپ) + آفکانواس (موبایل)
+        ===================================================== */
+        .app-shell {
+            display: flex;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .side-rail {
+            display: none;
+        }
+
+        @media (min-width: 992px) {
+            .side-rail {
+                display: flex;
+                flex-direction: column;
+                width: 232px;
+                min-height: 100vh;
+                background-color: var(--ink);
+                border-left: 1px solid var(--ink-line);
+                position: sticky;
+                top: 0;
+                flex-shrink: 0;
+            }
+            .btn-hamburger.d-lg-inline-flex-none { display: none !important; }
+        }
+
+        .side-rail .rail-brand {
+            padding: 22px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--ink-line);
+        }
+        .side-rail .rail-brand span {
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.02rem;
+        }
+
+        .side-rail .rail-nav { padding: 16px 12px; }
+
+        .rail-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--ink-muted);
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.92rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+            transition: all 0.18s ease;
+            cursor: pointer;
+        }
+        .rail-link i { font-size: 1.05rem; width: 20px; text-align: center; }
+        .rail-link:hover { background: var(--ink-2); color: #fff; }
+        .rail-link.active {
+            background: var(--saffron);
+            color: #1B1F27;
+            font-weight: 700;
+        }
+
+        .side-rail .rail-foot {
+            margin-top: auto;
+            padding: 16px 20px;
+            border-top: 1px solid var(--ink-line);
+            font-size: 0.74rem;
+            color: var(--ink-muted);
+        }
+
+        /* آفکانواس موبایل */
+        .offcanvas {
+            background-color: var(--ink);
+            border-left: 1px solid var(--ink-line);
+            width: 260px;
+        }
+        .offcanvas-header { border-bottom: 1px solid var(--ink-line); }
+        .offcanvas .rail-link { color: var(--ink-muted); }
+        .offcanvas .rail-link:hover { background: var(--ink-2); color: #fff; }
+        .offcanvas .rail-link.active { background: var(--saffron); color: #1B1F27; }
+
+        /* =====================================================
+           محتوای اصلی
+        ===================================================== */
+        .main-col { flex: 1; min-width: 0; }
+        .content-area { padding: 28px 24px 48px; max-width: 1280px; margin: 0 auto; }
 
         .section-title {
-            color: var(--accent-color);
-            border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            font-weight: 800;
+            font-size: 1.02rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .section-title i { color: var(--saffron); font-size: 1.05rem; }
+        .section-title .count-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--paper);
+            border: 1px solid var(--line);
+            padding: 2px 9px;
+            border-radius: 999px;
+            margin-right: auto;
         }
 
-        /* جداول */
-        .table {
+        /* کارت پایه */
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
             color: var(--text-main);
-            border-color: var(--border-color);
+            box-shadow: var(--shadow-card);
         }
-        .table-hover tbody tr:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: #fff;
+
+        /* کارت‌های آمار */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            padding: 18px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            height: 100%;
         }
-        th {
-            background-color: #2a2a2a !important;
-            color: var(--accent-color) !important;
+        .stat-card .stat-icon {
+            width: 42px; height: 42px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
+        .stat-icon.tone-basil { background: var(--basil-tint); color: var(--basil); }
+        .stat-icon.tone-saffron { background: var(--saffron-tint); color: var(--saffron-deep); }
+        .stat-icon.tone-slate { background: var(--slate-tint); color: var(--slate); }
+        .stat-icon.tone-rust { background: var(--rust-tint); color: var(--rust); }
+
+        .stat-card .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 2px; }
+        .stat-card .stat-value { font-size: 1.28rem; font-weight: 700; line-height: 1.1; }
+
+        /* =====================================================
+           تیکت سفارش — عنصر امضادار طراحی
+           نوار رنگی کنار کارت، وضعیت زمانی سفارش را نشان می‌دهد
+        ===================================================== */
+        .order-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 640px;
+            overflow-y: auto;
+            padding-left: 4px;
+        }
+        .order-column::-webkit-scrollbar { width: 6px; }
+        .order-column::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+
+        .order-ticket {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px 14px 14px;
+            padding-right: 20px;
+            overflow: hidden;
+        }
+        .order-ticket::before {
+            content: "";
+            position: absolute;
+            top: 0; right: 0; bottom: 0;
+            width: 4px;
+            background: var(--saffron);
+        }
+        .order-ticket.is-urgent::before { background: var(--rust); }
+        .order-ticket.is-ready::before { background: var(--basil); }
+
+        .order-ticket .order-id {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+        .order-ticket .order-table {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+        .time-chip {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 9px;
+            border-radius: 999px;
+            background: var(--paper);
+            color: var(--text-muted);
+            border: 1px solid var(--line);
+        }
+
+        /* =====================================================
+           پنل ارسال و تحویل
+        ===================================================== */
+        .robot-panel {
+            padding: 26px;
+        }
+        .dispatch-station {
+            text-align: center;
+            padding: 22px 16px 24px;
+            background: linear-gradient(180deg, var(--paper) 0%, var(--surface) 100%);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            margin-bottom: 22px;
+        }
+        .dispatch-station .station-icon {
+            width: 64px; height: 64px;
+            border-radius: 16px;
+            background: var(--ink);
+            color: var(--saffron);
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            font-size: 1.7rem;
+            margin-bottom: 10px;
+        }
+        .dispatch-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 2px;
+            border-bottom: 1px dashed var(--line);
+            font-size: 0.9rem;
+        }
+        .dispatch-row:last-of-type { border-bottom: none; }
+        .dispatch-row .label { color: var(--text-muted); }
+        .dispatch-row .value { font-weight: 700; }
+
+        .delivery-log-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 4px;
+            border-bottom: 1px solid var(--line);
+            font-size: 0.86rem;
+        }
+        .delivery-log-item:last-child { border-bottom: none; }
+        .delivery-log-item .tag {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            background: var(--paper);
+            border: 1px solid var(--line);
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        /* =====================================================
+           جدول منو
+        ===================================================== */
+        .table { color: var(--text-main); border-color: var(--line); vertical-align: middle; }
+        .table > :not(caption) > * > * { background-color: transparent; }
+        thead th {
+            background-color: var(--paper) !important;
+            color: var(--text-muted) !important;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--line) !important;
+            padding: 12px 10px;
+        }
+        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--line); }
+        .table-hover tbody tr:hover { background-color: var(--paper); }
+
+        .food-thumb {
+            width: 46px; height: 46px;
+            border-radius: 9px;
+            object-fit: cover;
+            border: 1px solid var(--line);
+        }
+
+        .status-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 11px;
+            border-radius: 999px;
+        }
+        .status-tag.available { background: var(--basil-tint); color: var(--basil); }
+        .status-tag.out { background: var(--rust-tint); color: var(--rust); }
+
+        .icon-btn {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text-muted);
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: 0.15s;
+        }
+        .icon-btn:hover { border-color: var(--saffron); color: var(--saffron-deep); background: var(--saffron-tint); }
+
+        .food-stock .stock-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 2px;
+            border-bottom: 1px solid var(--line);
+            font-size: 0.88rem;
+        }
+        .food-stock .stock-row:last-child { border-bottom: none; }
+
+        .btn-primary-brand {
+            background: var(--saffron);
+            border: 1px solid var(--saffron);
+            color: #1B1F27;
+            font-weight: 700;
+        }
+        .btn-primary-brand:hover { background: var(--saffron-deep); border-color: var(--saffron-deep); color: #fff; }
+
+        .btn-outline-brand {
+            border: 1px solid var(--line);
+            color: var(--text-main);
+            background: var(--surface);
+            font-weight: 600;
+        }
+        .btn-outline-brand:hover { border-color: var(--saffron); color: var(--saffron-deep); background: var(--saffron-tint); }
 
         /* مودال‌ها */
         .modal-content {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--accent-color);
+            background-color: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            color: var(--text-main);
         }
-        .modal-header {
-            border-bottom: 1px solid var(--border-color);
+        .modal-header, .modal-footer { border-color: var(--line); }
+        .modal-title { color: var(--text-main); font-weight: 800; }
+        .modal-title i { color: var(--saffron-deep); }
+        .btn-close { filter: none; }
+
+        .form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+        .form-control, .form-select {
+            background-color: var(--surface);
+            border: 1px solid var(--line);
+            color: var(--text-main);
+            border-radius: var(--radius-sm);
         }
-        .modal-footer {
-            border-top: 1px solid var(--border-color);
-        }
-        .form-control {
-            background-color: #2a2a2a;
-            border: 1px solid var(--border-color);
-            color: #fff;
-        }
-        .form-control:focus {
-            background-color: #333;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 5px rgba(255, 107, 0, 0.5);
-            color: #fff;
+        .form-control:focus, .form-select:focus {
+            background-color: var(--surface);
+            border-color: var(--saffron);
+            box-shadow: 0 0 0 3px var(--saffron-tint);
+            color: var(--text-main);
         }
 
-        /* دکمه همبرگری */
-        .btn-hamburger {
-            background: transparent;
-            color: var(--accent-color);
-            border: 2px solid var(--accent-color);
-            border-radius: 4px;
-            padding: 5px 12px;
-            font-size: 1.5rem;
-            transition: 0.3s;
+        .alert-dark {
+            background: var(--saffron-tint);
+            border: 1px solid var(--saffron);
+            color: #7A5203;
         }
-        .btn-hamburger:hover {
-            background: var(--accent-color);
-            color: #fff;
+
+        @media (prefers-reduced-motion: reduce) {
+            .live-pill .dot { animation: none; }
         }
     </style>
 </head>
 <body>
 
-<header class="industrial-header sticky-top">
-    <div class="container-fluid d-flex align-items-center justify-content-between">
-        
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn-hamburger" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainMenuOffcanvas" aria-controls="mainMenuOffcanvas">
-                <i class="bi bi-list"></i>
-            </button>
-            
-            <h4 class="mb-0" style="color: var(--text-main);">
-                <i class="bi bi-cpu-fill text-warning"></i>
-                پنل مدیریت فیدر
-            </h4>
-        </div>
-        
-        <div class="d-none d-md-block text-muted">
-            کنترل سفارش‌ها و ارسال به ربات
-        </div>
-    </div>
-</header>
+<div class="app-shell">
 
-<div class="offcanvas offcanvas-start" tabindex="-1" id="mainMenuOffcanvas">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title text-warning"><i class="bi bi-gear-fill"></i> کنترل پنل صنعتی</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    
-    <div class="offcanvas-body">
-        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-            <button class="nav-link active text-start" id="nav-dashboard-tab" data-bs-toggle="pill" data-bs-target="#nav-dashboard" type="button" role="tab" aria-controls="nav-dashboard" aria-selected="true">
-                <i class="bi bi-speedometer2 me-2"></i> داشبورد و سفارشات
-            </button>
-            
-            <button class="nav-link text-start" id="nav-robot-tab" data-bs-toggle="pill" data-bs-target="#nav-robot" type="button" role="tab" aria-controls="nav-robot" aria-selected="false">
-                <i class="bi bi-robot me-2"></i> وضعیت ربات
-            </button>
-            
-            <button class="nav-link text-start" id="nav-menu-tab" data-bs-toggle="pill" data-bs-target="#nav-menu" type="button" role="tab" aria-controls="nav-menu" aria-selected="false">
-                <i class="bi bi-egg-fried me-2"></i> مدیریت منو و فیدر
-            </button>
+    <!-- سایدبار ثابت دسکتاپ -->
+    <aside class="side-rail">
+        <div class="rail-brand">
+            <div class="app-header brand-mark" style="padding:0;"><i class="bi bi-shop"></i></div>
+            <span>پنل مدیریت سفارش</span>
+        </div>
+        <nav class="rail-nav" id="v-pills-tab-desktop">
+            <div class="rail-link active" data-bs-toggle="pill" data-bs-target="#nav-dashboard" data-sync="nav-dashboard-tab">
+                <i class="bi bi-speedometer2"></i> داشبورد و سفارش‌ها
+            </div>
+            <div class="rail-link" data-bs-toggle="pill" data-bs-target="#nav-robot" data-sync="nav-robot-tab">
+                <i class="bi bi-truck"></i> وضعیت ارسال
+            </div>
+            <div class="rail-link" data-bs-toggle="pill" data-bs-target="#nav-menu" data-sync="nav-menu-tab">
+                <i class="bi bi-journal-richtext"></i> مدیریت منو و موجودی
+            </div>
+        </nav>
+        <div class="rail-foot">نسخه پنل ۲.۰ — بروزرسانی زنده</div>
+    </aside>
+
+    <div class="main-col">
+        <header class="app-header sticky-top">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn-hamburger d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainMenuOffcanvas" aria-controls="mainMenuOffcanvas">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="d-flex align-items-center gap-2 d-lg-none">
+                        <div class="brand-mark"><i class="bi bi-shop"></i></div>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">پنل مدیریت سفارش‌ها</h4>
+                        <div class="subtitle">مدیریت سفارش‌ها، منو و وضعیت ارسال</div>
+                    </div>
+                </div>
+
+                <div class="d-none d-md-flex align-items-center gap-2">
+                    <span class="live-pill"><span class="dot"></span> اتصال برقرار است</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- آفکانواس موبایل -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="mainMenuOffcanvas">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title text-white"><i class="bi bi-shop text-warning"></i> پنل مدیریت سفارش</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div class="nav flex-column" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <button class="nav-link rail-link active text-start" id="nav-dashboard-tab" data-bs-toggle="pill" data-bs-target="#nav-dashboard" type="button" role="tab" aria-controls="nav-dashboard" aria-selected="true">
+                        <i class="bi bi-speedometer2 me-2"></i> داشبورد و سفارش‌ها
+                    </button>
+                    <button class="nav-link rail-link text-start" id="nav-robot-tab" data-bs-toggle="pill" data-bs-target="#nav-robot" type="button" role="tab" aria-controls="nav-robot" aria-selected="false">
+                        <i class="bi bi-truck me-2"></i> وضعیت ارسال
+                    </button>
+                    <button class="nav-link rail-link text-start" id="nav-menu-tab" data-bs-toggle="pill" data-bs-target="#nav-menu" type="button" role="tab" aria-controls="nav-menu" aria-selected="false">
+                        <i class="bi bi-journal-richtext me-2"></i> مدیریت منو و موجودی
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="tab-content" id="v-pills-tabContent">
+
+                <!-- داشبورد -->
+                <div class="tab-pane fade show active" id="nav-dashboard" role="tabpanel" aria-labelledby="nav-dashboard-tab">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3 col-sm-6">
+                            <div class="stat-card">
+                                <div class="stat-icon tone-basil"><i class="bi bi-check2-circle"></i></div>
+                                <div>
+                                    <div class="stat-label">وضعیت سیستم</div>
+                                    <div class="stat-value">فعال</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="stat-card">
+                                <div class="stat-icon tone-saffron"><i class="bi bi-clock-history"></i></div>
+                                <div>
+                                    <div class="stat-label">میانگین زمان آماده‌سازی</div>
+                                    <div class="stat-value">۱۸ دقیقه</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="stat-card">
+                                <div class="stat-icon tone-slate"><i class="bi bi-truck"></i></div>
+                                <div>
+                                    <div class="stat-label">در صف ارسال</div>
+                                    <div class="stat-value">آماده</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="stat-card">
+                                <div class="stat-icon tone-rust"><i class="bi bi-list-check"></i></div>
+                                <div>
+                                    <div class="stat-label">سفارش فعال</div>
+                                    <div class="stat-value" id="activeOrdersCount">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="card p-3 h-100">
+                                <h4 class="section-title">
+                                    <i class="bi bi-bell-fill"></i> سفارش‌های جدید
+                                </h4>
+                                <div class="order-column" id="ordersContainer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card p-3 h-100">
+                                <h4 class="section-title">
+                                    <i class="bi bi-fire"></i> در حال آماده‌سازی
+                                </h4>
+                                <div class="order-column" id="cookingOrdersContainer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- وضعیت ارسال -->
+                <div class="tab-pane fade" id="nav-robot" role="tabpanel" aria-labelledby="nav-robot-tab">
+                    <div class="row">
+                        <div class="col-lg-6 mx-auto">
+                            <div class="card robot-panel">
+                                <h4 class="section-title">
+                                    <i class="bi bi-truck"></i> وضعیت ارسال و تحویل
+                                </h4>
+
+                                <div class="dispatch-station">
+                                    <div class="station-icon"><i class="bi bi-box-seam"></i></div>
+                                    <h5 class="mb-0 fw-bold">ایستگاه ارسال ۰۱</h5>
+                                    <div class="text-muted small mt-1">آماده دریافت سفارش بعدی</div>
+                                </div>
+
+                                <div class="dispatch-row">
+                                    <span class="label">وضعیت:</span>
+                                    <span class="value" style="color: var(--basil);">آماده</span>
+                                </div>
+                                <div class="dispatch-row">
+                                    <span class="label">مقصد بعدی:</span>
+                                    <span class="value">—</span>
+                                </div>
+                                <div class="dispatch-row mb-4">
+                                    <span class="label">ظرفیت باقی‌مانده:</span>
+                                    <span class="value" style="color: var(--slate);">۹۱٪</span>
+                                </div>
+
+                                <h6 class="text-muted mb-2 mt-2" style="font-size:0.82rem; font-weight:700;">آخرین تحویل‌ها</h6>
+                                <div>
+                                    <div class="delivery-log-item">
+                                        <span>سفارش ۱۱۵</span> <span class="tag">میز ۲</span>
+                                    </div>
+                                    <div class="delivery-log-item">
+                                        <span>سفارش ۱۱۶</span> <span class="tag">میز ۵</span>
+                                    </div>
+                                    <div class="delivery-log-item">
+                                        <span>سفارش ۱۱۷</span> <span class="tag">میز ۳</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- مدیریت منو -->
+                <div class="tab-pane fade" id="nav-menu" role="tabpanel" aria-labelledby="nav-menu-tab">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h4 class="section-title mb-0">
+                            <i class="bi bi-journal-richtext"></i> مدیریت منوی غذا
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-brand" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                <i class="bi bi-tags"></i> افزودن دسته
+                            </button>
+                            <button class="btn btn-primary-brand" data-bs-toggle="modal" data-bs-target="#addFoodModal">
+                                <i class="bi bi-plus-lg"></i> افزودن غذا
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle text-center mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>تصویر</th>
+                                            <th>نام غذا</th>
+                                            <th>قیمت</th>
+                                            <th>موجودی</th>
+                                            <th>وضعیت</th>
+                                            <th>عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="foodsContainer">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card p-3 food-stock">
+                                <h5 class="section-title border-0 mb-2">
+                                    <i class="bi bi-box-fill"></i> موجودی انبار
+                                </h5>
+                                <div id="foodStockContainer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
 
-<div class="container-fluid mt-4">
-    <div class="tab-content" id="v-pills-tabContent">
-
-        <div class="tab-pane fade show active" id="nav-dashboard" role="tabpanel" aria-labelledby="nav-dashboard-tab">
-            
-            <div class="row mb-4">
-                <div class="col-md-3 col-sm-6">
-                    <div class="status-card">
-                        <div>
-                            <i class="bi bi-robot"></i> <span class="ms-2">ربات</span>
-                        </div>
-                        <b class="text-success">آماده</b>
-                    </div>
+<!-- مودال افزودن دسته -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-tags"></i> افزودن دسته‌بندی جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">نام دسته</label>
+                    <input type="text" id="categoryName" class="form-control" placeholder="مثلاً کباب‌ها، نوشیدنی‌ها">
                 </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="status-card">
-                        <div>
-                            <i class="bi bi-box-seam"></i> <span class="ms-2">فیدر</span>
-                        </div>
-                        <b class="text-warning">آماده بارگیری</b>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="status-card">
-                        <div>
-                            <i class="bi bi-battery-half"></i> <span class="ms-2">باتری</span>
-                        </div>
-                        <b class="text-info">91%</b>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="status-card">
-                        <div>
-                            <i class="bi bi-list-check"></i> <span class="ms-2">سفارش فعال</span>
-                        </div>
-                        <b id="activeOrdersCount" class="text-danger">0</b>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">آیکون دسته (ایموجی)</label>
+                    <input type="text" id="categoryIcon" class="form-control" value="🍽" placeholder="مثلاً 🍕 یا 🍔">
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="card p-3 h-100">
-                        <h4 class="section-title">
-                            <i class="bi bi-bell-fill text-warning"></i> سفارش‌های جدید
-                        </h4>
-                        <div class="order-column" id="ordersContainer">
-                            </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card p-3 h-100">
-                        <h4 class="section-title">
-                            <i class="bi bi-fire text-danger"></i> در حال آماده سازی
-                        </h4>
-                        <div class="order-column" id="cookingOrdersContainer">
-                            </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="nav-robot" role="tabpanel" aria-labelledby="nav-robot-tab">
-            <div class="row">
-                <div class="col-lg-6 mx-auto">
-                    <div class="card p-4 robot-panel">
-                        <h4 class="section-title">
-                            <i class="bi bi-robot"></i> مانیتورینگ ربات
-                        </h4>
-                        
-                        <div class="robot-status text-center mb-4">
-                            <div class="robot-icon" style="font-size: 4rem;">🤖</div>
-                            <h5 class="text-warning mt-2">Robot-01</h5>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>وضعیت:</span>
-                            <span class="text-success fw-bold">آماده</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>مقصد:</span>
-                            <span class="text-light">-</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-4">
-                            <span>باتری:</span>
-                            <span class="text-info fw-bold">91%</span>
-                        </div>
-
-                        <hr style="border-color: var(--border-color);">
-
-                        <h6 class="text-muted mb-3">آخرین تحویل‌ها</h6>
-                        <ul class="list-group list-group-flush bg-transparent">
-                            <li class="list-group-item bg-transparent text-light d-flex justify-content-between border-secondary">
-                                سفارش 115 <span>میز 2</span>
-                            </li>
-                            <li class="list-group-item bg-transparent text-light d-flex justify-content-between border-secondary">
-                                سفارش 116 <span>میز 5</span>
-                            </li>
-                            <li class="list-group-item bg-transparent text-light d-flex justify-content-between border-secondary">
-                                سفارش 117 <span>میز 3</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="nav-menu" role="tabpanel" aria-labelledby="nav-menu-tab">
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="section-title mb-0 border-0">
-                    <i class="bi bi-tools"></i> مدیریت منوی غذا
-                </h4>
-                <button class="btn btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#addFoodModal">
-                    <i class="bi bi-plus-lg"></i> افزودن غذا
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-brand" data-bs-dismiss="modal">لغو</button>
+                <button type="button" class="btn btn-primary-brand" onclick="createCategory()">
+                    <i class="bi bi-check-lg"></i> ذخیره دسته
                 </button>
             </div>
-
-            <div class="card shadow-sm mb-5">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle text-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th>تصویر</th>
-                                    <th>نام غذا</th>
-                                    <th>قیمت</th>
-                                    <th>موجودی</th>
-                                    <th>وضعیت</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="foodsContainer">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="card p-3 food-stock">
-                        <h5 class="section-title border-0">
-                            <i class="bi bi-box-fill"></i> موجودی فیدر
-                        </h5>
-                        <div id="foodStockContainer">
-                            </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
-
     </div>
 </div>
 
+<!-- مودال افزودن غذا -->
 <div class="modal fade" id="addFoodModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-warning"><i class="bi bi-plus-circle"></i> افزودن غذای جدید</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> افزودن غذای جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
@@ -364,7 +774,13 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">نام غذا</label>
-                    <input type="text" id="foodName" class="form-control" placeholder="مثلاً کباب">
+                    <input type="text" id="foodName" class="form-control" placeholder="مثلاً کباب کوبیده">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">دسته‌بندی غذا</label>
+                    <select id="foodCategory" class="form-control form-select">
+                        <option value="" disabled selected>در حال بارگذاری دسته‌ها...</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">قیمت</label>
@@ -376,8 +792,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لغو</button>
-                <button type="button" class="btn btn-warning text-dark fw-bold" onclick="createFood()">
+                <button type="button" class="btn btn-outline-brand" data-bs-dismiss="modal">لغو</button>
+                <button type="button" class="btn btn-primary-brand" onclick="createFood()">
                     <i class="bi bi-check-lg"></i> افزودن غذا
                 </button>
             </div>
@@ -385,12 +801,13 @@
     </div>
 </div>
 
+<!-- مودال ویرایش غذا -->
 <div class="modal fade" id="editFoodModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-warning"><i class="bi bi-pencil-square"></i> ویرایش غذا</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title"><i class="bi bi-pencil-square"></i> ویرایش غذا</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editFoodId">
@@ -408,8 +825,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لغو</button>
-                <button type="button" class="btn btn-warning text-dark fw-bold" onclick="updateFood()">
+                <button type="button" class="btn btn-outline-brand" data-bs-dismiss="modal">لغو</button>
+                <button type="button" class="btn btn-primary-brand" onclick="updateFood()">
                     <i class="bi bi-check-lg"></i> ذخیره تغییرات
                 </button>
             </div>
@@ -417,28 +834,53 @@
     </div>
 </div>
 
+<!-- مودال ارسال سفارش (شناسه robotModal برای سازگاری با اسکریپت فعلی حفظ شده) -->
 <div class="modal fade" id="robotModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="text-warning"><i class="bi bi-send-fill"></i> ارسال سفارش</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title"><i class="bi bi-send-fill"></i> ارسال سفارش</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="fs-5">غذا داخل فیدر قرار گرفته است؟</p>
-                <div class="alert alert-dark border-warning text-warning">
-                    پس از تایید، اطلاعات سفارش برای ربات ارسال می‌شود.
+                <p class="fs-5 mb-3">آیا سفارش آماده ارسال است؟</p>
+                <div class="alert alert-dark border-0">
+                    پس از تایید، اطلاعات سفارش برای واحد ارسال ثبت می‌شود.
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">خیر</button>
-                <button class="btn btn-success" onclick="sendRobot()">بله، ارسال شود</button>
+                <button class="btn btn-outline-brand" data-bs-dismiss="modal">خیر</button>
+                <button class="btn btn-primary-brand" onclick="sendRobot()">بله، ارسال شود</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // هماهنگ‌سازی وضعیت فعال بین سایدبار دسکتاپ و آفکانواس موبایل
+    document.querySelectorAll('#v-pills-tab-desktop .rail-link').forEach(function (railBtn) {
+        railBtn.addEventListener('click', function () {
+            document.querySelectorAll('#v-pills-tab-desktop .rail-link').forEach(el => el.classList.remove('active'));
+            railBtn.classList.add('active');
+            var syncId = railBtn.getAttribute('data-sync');
+            var target = railBtn.getAttribute('data-bs-target');
+            var offcanvasBtn = document.getElementById(syncId);
+            if (offcanvasBtn) {
+                var tabTrigger = new bootstrap.Tab(offcanvasBtn);
+                tabTrigger.show();
+            }
+        });
+    });
+    document.querySelectorAll('#v-pills-tab .nav-link').forEach(function (navBtn) {
+        navBtn.addEventListener('shown.bs.tab', function () {
+            var target = navBtn.getAttribute('data-bs-target');
+            document.querySelectorAll('#v-pills-tab-desktop .rail-link').forEach(function (railBtn) {
+                railBtn.classList.toggle('active', railBtn.getAttribute('data-bs-target') === target);
+            });
+        });
+    });
+</script>
 <script src="{% static 'js/dashboard.js' %}"></script>
 
 </body>

@@ -1,1670 +1,746 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>پیگیری سفارش #{{ order.id }}</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <title>
-        پیگیری سفارش #{{ order.id }}
-    </title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
-        rel="stylesheet"
-    >
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-        rel="stylesheet"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
+        :root {
+            --bg-color: #e0e5ec;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --accent-glow: rgba(255, 152, 0, 0.4);
+            --shadow-light: #ffffff;
+            --shadow-dark: #a3b1c6;
+        }
 
         * {
             box-sizing: border-box;
         }
 
         body {
-
             margin: 0;
-
             min-height: 100vh;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #f8f9fa,
-                    #eef1f5
-                );
-
-            font-family:
-                Tahoma,
-                Arial,
-                sans-serif;
-
-            color: #212529;
+            background: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            color: var(--text-main);
+            overflow-x: hidden;
         }
 
+        /* =========================
+           3D Loading Screen
+        ========================= */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .scene {
+            width: 80px;
+            height: 80px;
+            perspective: 600px;
+            margin-bottom: 30px;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: spinCube 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cube__face {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(255,152,0,0.8), rgba(255,87,34,0.8));
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2), 0 0 15px var(--accent-glow);
+        }
+
+        .cube__face--front  { transform: rotateY(  0deg) translateZ(40px); }
+        .cube__face--right  { transform: rotateY( 90deg) translateZ(40px); }
+        .cube__face--back   { transform: rotateY(180deg) translateZ(40px); }
+        .cube__face--left   { transform: rotateY(-90deg) translateZ(40px); }
+        .cube__face--top    { transform: rotateX( 90deg) translateZ(40px); }
+        .cube__face--bottom { transform: rotateX(-90deg) translateZ(40px); }
+
+        @keyframes spinCube {
+            0% { transform: translateZ(-40px) rotateX(0deg) rotateY(0deg); }
+            100% { transform: translateZ(-40px) rotateX(360deg) rotateY(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            animation: pulseText 1.5s infinite alternate;
+        }
+
+        @keyframes pulseText {
+            0% { opacity: 0.5; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1.02); }
+        }
+
+        .fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
 
         /* =========================
-           Main
+           Main Wrapper & Card
         ========================= */
-
         .page-wrapper {
-
-            max-width: 900px;
-
+            max-width: 800px;
             margin: auto;
-
-            padding:
-                35px 15px 60px;
+            padding: 40px 15px 60px;
         }
-
-        
-                /* =========================
-           Rejected Order
-        ========================= */
-        
-        .rejected-box {
-        
-            margin-top: 25px;
-        
-            padding: 20px;
-        
-            border-radius: 20px;
-        
-            display: flex;
-        
-            align-items: center;
-        
-            gap: 15px;
-        
-            text-align: right;
-        
-            background:
-                linear-gradient(
-                    135deg,
-                    #fff1f1,
-                    #ffe3e3
-                );
-        
-            border:
-                1px solid #f5b5b5;
-        
-            color: #842029;
-        }
-        
-        
-        .rejected-box h5 {
-        
-            margin: 0 0 6px;
-        
-            font-weight: 800;
-        
-        }
-        
-        
-        .rejected-box p {
-        
-            margin: 0 0 5px;
-        
-            font-size: 14px;
-        
-        }
-        
-        
-        .rejected-box small {
-        
-            color: #a33a44;
-        
-        }
-        
-        
-        .rejected-icon {
-        
-            width: 52px;
-        
-            height: 52px;
-        
-            min-width: 52px;
-        
-            border-radius: 16px;
-        
-            display: flex;
-        
-            align-items: center;
-        
-            justify-content: center;
-        
-            background: #dc3545;
-        
-            color: white;
-        
-            font-size: 22px;
-        
-            box-shadow:
-                0 8px 20px
-                rgba(220,53,69,.25);
-        }
-        
-        
-        /* وضعیت رد شده */
-        
-        .status-rejected {
-        
-            background: #dc3545 !important;
-        
-            color: white !important;
-        
-            box-shadow:
-                0 0 0 6px
-                rgba(220,53,69,.12) !important;
-        }
-        
-        
-        .progress-rejected {
-        
-            background:
-                linear-gradient(
-                    90deg,
-                    #dc3545,
-                    #b02a37
-                ) !important;
-        }
-                
-        
-        
-        /* =========================
-           Top Header
-        ========================= */
-        
-        .top-header {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            margin-bottom: 25px;
-        }
-
-
-        .brand {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 12px;
-        }
-
-
-        .brand-icon {
-
-            width: 52px;
-
-            height: 52px;
-
-            border-radius: 16px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #ffc107,
-                    #ff9800
-                );
-
-            color: white;
-
-            font-size: 26px;
-
-            box-shadow:
-                0 8px 20px
-                rgba(255,193,7,.25);
-        }
-
-
-        .brand h5 {
-
-            margin: 0;
-
-            font-weight: 800;
-        }
-
-
-        .brand small {
-
-            color: #6c757d;
-        }
-
-
-        .connection {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 7px;
-
-            font-size: 13px;
-
-            color: #198754;
-        }
-
-
-        .connection-dot {
-
-            width: 9px;
-
-            height: 9px;
-
-            border-radius: 50%;
-
-            background: #198754;
-
-            box-shadow:
-                0 0 0 5px
-                rgba(25,135,84,.12);
-        }
-
-
-        /* =========================
-           Main Card
-        ========================= */
 
         .tracking-card {
-
-            background: white;
-
-            border-radius: 28px;
-
-            padding: 35px;
-
-            box-shadow:
-                0 20px 60px
-                rgba(0,0,0,.08);
-
-            border:
-                1px solid
-                rgba(0,0,0,.04);
-        }
-
-
-        /* =========================
-           Robot
-        ========================= */
-
-        .robot-wrapper {
-
-            width: 105px;
-
-            height: 105px;
-
-            margin: 0 auto 15px;
-
-            border-radius: 50%;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #fff3cd,
-                    #ffe69c
-                );
-
-            box-shadow:
-                0 12px 35px
-                rgba(255,193,7,.22);
-
-            animation:
-                floatRobot 3s ease-in-out infinite;
-        }
-
-
-        .robot {
-
-            font-size: 55px;
-        }
-
-
-        @keyframes floatRobot {
-
-            0%, 100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-7px);
-            }
-        }
-
-
-        .order-title {
-
-            font-weight: 800;
-
-            margin-top: 10px;
-        }
-
-
-        .order-number {
-
-            color: #6c757d;
-
-            font-size: 14px;
-        }
-
-
-        .order-number strong {
-
-            color: #212529;
-        }
-
-
-        /* =========================
-           Order Summary
-        ========================= */
-
-        .summary-grid {
-
-            display: grid;
-
-            grid-template-columns:
-                repeat(2, 1fr);
-
-            gap: 12px;
-
-            margin-top: 25px;
-        }
-
-
-        .summary-box {
-
-            background: #f8f9fa;
-
-            border-radius: 16px;
-
-            padding: 16px;
-
-            text-align: right;
-
-            border:
-                1px solid #edf0f2;
-        }
-
-
-        .summary-box i {
-
-            font-size: 20px;
-
-            color: #ff9800;
-
-            margin-left: 7px;
-        }
-
-
-        .summary-label {
-
-            display: block;
-
-            color: #6c757d;
-
-            font-size: 12px;
-
-            margin-bottom: 5px;
-        }
-
-
-        .summary-value {
-
-            font-weight: 700;
-
-            font-size: 15px;
-        }
-
-
-        /* =========================
-           Status
-        ========================= */
-
-        .current-status {
-
-            margin-top: 30px;
-
-            padding: 22px;
-
-            border-radius: 20px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #fff8e1,
-                    #fff3cd
-                );
-
-            border:
-                1px solid #ffe69c;
-        }
-
-
-        .status-label {
-
-            color: #856404;
-
-            font-size: 13px;
-
-            margin-bottom: 5px;
-        }
-
-
-        #statusText {
-
-            font-size: 22px;
-
-            font-weight: 800;
-
-            color: #664d03;
-
-            margin: 0;
-        }
-
-
-        /* =========================
-           Progress
-        ========================= */
-
-        .progress-section {
-
-            margin-top: 30px;
-        }
-
-
-        .progress-info {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            margin-bottom: 10px;
-        }
-
-
-        .progress-info span {
-
-            color: #6c757d;
-
-            font-size: 14px;
-        }
-
-
-        #progressPercent {
-
-            font-size: 18px;
-
-            font-weight: 800;
-        }
-
-
-        .progress {
-
-            height: 14px;
-
-            background: #e9ecef;
-
-            border-radius: 50px;
-
+            background: var(--bg-color);
+            border-radius: 40px;
+            padding: 40px;
+            box-shadow: 
+                15px 15px 30px var(--shadow-dark),
+                -15px -15px 30px var(--shadow-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
             overflow: hidden;
         }
 
-
-        #progressBar {
-
-            border-radius: 50px;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    #ffc107,
-                    #ff9800
-                );
-
-            transition:
-                width .8s ease;
+        /* =========================
+           Top Header
+        ========================= */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-        /* =========================
-           Waiting Time
-        ========================= */
-
-        .waiting-box {
-
-            margin-top: 25px;
-
-            padding: 20px;
-
+        .brand-icon {
+            width: 60px;
+            height: 60px;
             border-radius: 20px;
-
             display: flex;
-
             align-items: center;
-
-            gap: 15px;
-
-            background:
-                #f1f8ff;
-
-            border:
-                1px solid #d7ebff;
-        }
-
-
-        .waiting-icon {
-
-            width: 48px;
-
-            height: 48px;
-
-            border-radius: 14px;
-
-            display: flex;
-
-            align-items: center;
-
             justify-content: center;
-
-            background: #0d6efd;
-
+            background: linear-gradient(145deg, #ffb300, #ff8f00);
             color: white;
-
-            font-size: 22px;
+            font-size: 30px;
+            box-shadow: 
+                8px 8px 16px rgba(255, 152, 0, 0.3),
+                -4px -4px 10px rgba(255, 255, 255, 0.8),
+                inset 2px 2px 4px rgba(255, 255, 255, 0.5);
         }
 
-
-        .waiting-text {
-
-            text-align: right;
+        .brand h5 {
+            margin: 0;
+            font-weight: 900;
         }
 
-
-        .waiting-text small {
-
-            display: block;
-
-            color: #6c757d;
-        }
-
-
-        #waitingTime {
-
-            font-size: 18px;
-
-            font-weight: 800;
-
-            color: #0d6efd;
-        }
-
-
-        /* =========================
-           Timeline
-        ========================= */
-
-        .timeline-title {
-
-            margin-top: 35px;
-
-            margin-bottom: 20px;
-
-            font-weight: 800;
-
-            text-align: right;
-        }
-
-
-        .timeline {
-
-            position: relative;
-
-            padding-right: 10px;
-        }
-
-
-        .status-item {
-
-            position: relative;
-
+        .connection {
             display: flex;
-
             align-items: center;
-
-            gap: 15px;
-
-            min-height: 78px;
-
-            padding-bottom: 18px;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #10ac6e;
+            background: var(--bg-color);
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 
+                inset 4px 4px 8px var(--shadow-dark),
+                inset -4px -4px 8px var(--shadow-light);
         }
 
-
-        .status-item:not(:last-child)::before {
-
-            content: "";
-
-            position: absolute;
-
-            right: 22px;
-
-            top: 48px;
-
-            width: 2px;
-
-            height: 48px;
-
-            background: #dee2e6;
-        }
-
-
-        .status-icon {
-
-            position: relative;
-
-            z-index: 2;
-
-            width: 45px;
-
-            height: 45px;
-
-            min-width: 45px;
-
+        .connection-dot {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            background: #f1f3f5;
-
-            color: #6c757d;
-
-            font-weight: 700;
-
-            border: 3px solid white;
-
-            box-shadow:
-                0 3px 10px
-                rgba(0,0,0,.08);
-
-            transition: .3s;
+            background: #10ac6e;
+            box-shadow: 0 0 10px #10ac6e, 0 0 20px #10ac6e;
+            animation: pulse 1.5s infinite alternate;
         }
 
-
-        .status-done {
-
-            background: #198754;
-
-            color: white;
-
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            100% { transform: scale(1.2); opacity: 1; }
         }
-
-
-        .status-active {
-
-            background: #ffc107;
-
-            color: #212529;
-
-            box-shadow:
-                0 0 0 6px
-                rgba(255,193,7,.15);
-        }
-
-
-        .status-content {
-
-            text-align: right;
-        }
-
-
-        .status-content strong {
-
-            display: block;
-
-            font-size: 15px;
-
-        }
-
-
-        .status-content small {
-
-            color: #6c757d;
-
-            font-size: 12px;
-
-        }
-
 
         /* =========================
-           Footer
+           3D Floating Robot
         ========================= */
+        .robot-wrapper {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            box-shadow: 
+                10px 10px 20px var(--shadow-dark),
+                -10px -10px 20px var(--shadow-light),
+                inset 5px 5px 10px #ffffff;
+            animation: floatRobot 4s ease-in-out infinite;
+            position: relative;
+        }
 
-        .footer-message {
+        .robot-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            width: 70px;
+            height: 15px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 50%;
+            filter: blur(5px);
+            animation: shadowScale 4s ease-in-out infinite;
+        }
 
-            margin-top: 25px;
+        .robot {
+            font-size: 70px;
+            filter: drop-shadow(0px 8px 6px rgba(0,0,0,0.2));
+            z-index: 2;
+        }
 
-            padding-top: 20px;
+        @keyframes floatRobot {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        @keyframes shadowScale {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(0.7); opacity: 0.2; }
+        }
 
-            border-top:
-                1px solid #eee;
+        .order-title {
+            font-weight: 900;
+            text-align: center;
+            margin-top: 15px;
+        }
 
-            color: #6c757d;
-
-            font-size: 13px;
-
+        .order-number {
+            color: var(--text-muted);
             text-align: center;
         }
-
-
         /* =========================
-           Mobile
+           Summary Grid (Inset 3D)
         ========================= */
-
-        @media (max-width: 576px) {
-
-            .page-wrapper {
-
-                padding:
-                    15px 10px 35px;
-            }
-
-
-            .tracking-card {
-
-                padding: 22px 17px;
-
-                border-radius: 22px;
-            }
-
-
-            .top-header {
-
-                margin-bottom: 15px;
-            }
-
-
-            .connection {
-
-                display: none;
-            }
-
-
-            .summary-grid {
-
-                grid-template-columns:
-                    1fr;
-            }
-
-
-            .robot-wrapper {
-
-                width: 85px;
-
-                height: 85px;
-            }
-
-
-            .robot {
-
-                font-size: 45px;
-            }
-
-
-            #statusText {
-
-                font-size: 19px;
-            }
-
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
         }
 
+        .summary-box {
+            background: var(--bg-color);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: right;
+            box-shadow: 
+                inset 6px 6px 12px var(--shadow-dark),
+                inset -6px -6px 12px var(--shadow-light);
+        }
+
+        .summary-box i {
+            font-size: 24px;
+            background: linear-gradient(135deg, #ff9800, #f44336);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .summary-label {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .summary-value {
+            font-weight: 900;
+            font-size: 18px;
+        }
+
+        /* =========================
+           3D Progress Bar
+        ========================= */
+        .progress-section {
+            margin-top: 40px;
+            background: var(--bg-color);
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 
+                8px 8px 16px var(--shadow-dark),
+                -8px -8px 16px var(--shadow-light);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        #progressPercent {
+            font-size: 22px;
+            font-weight: 900;
+            color: #ff9800;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .progress {
+            height: 22px;
+            background: var(--bg-color);
+            border-radius: 50px;
+            box-shadow: 
+                inset 4px 4px 8px var(--shadow-dark),
+                inset -4px -4px 8px var(--shadow-light);
+            overflow: visible; /* To allow glow */
+            border: none;
+        }
+
+        #progressBar {
+            height: 100%;
+            border-radius: 50px;
+            background: linear-gradient(90deg, #ffc107, #ff5722);
+            box-shadow: 
+                inset 2px 2px 5px rgba(255,255,255,0.4),
+                inset -2px -2px 5px rgba(0,0,0,0.1),
+                0 0 15px var(--accent-glow);
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        #progressBar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(255,255,255,0.3) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+            border-radius: 50px;
+        }
+
+        /* =========================
+           3D Timeline
+        ========================= */
+        .timeline-title {
+            margin-top: 40px;
+            font-weight: 900;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.05);
+        }
+
+        .timeline {
+            position: relative;
+            padding-right: 15px;
+            margin-top: 25px;
+        }
+
+        .status-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-height: 80px;
+            padding-bottom: 20px;
+        }
+
+        .status-item:not(:last-child)::before {
+            content: "";
+            position: absolute;
+            right: 23px;
+            top: 50px;
+            width: 4px;
+            height: 45px;
+            background: var(--bg-color);
+            box-shadow: 
+                inset 1px 1px 3px var(--shadow-dark),
+                inset -1px -1px 3px var(--shadow-light);
+            border-radius: 2px;
+        }
+
+        .status-icon {
+            position: relative;
+            z-index: 2;
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-color);
+            color: var(--text-muted);
+            font-weight: 900;
+            font-size: 18px;
+            box-shadow: 
+                5px 5px 10px var(--shadow-dark),
+                -5px -5px 10px var(--shadow-light);
+            transition: all 0.4s ease;
+        }
+
+        .status-done {
+            background: #10ac6e;
+            color: white;
+            box-shadow: 
+                5px 5px 15px rgba(16, 172, 110, 0.4),
+                inset 2px 2px 5px rgba(255,255,255,0.4),
+                inset -2px -2px 5px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .status-active {
+            background: #ff9800;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 
+                0 0 20px rgba(255, 152, 0, 0.5),
+                inset 2px 2px 5px rgba(255,255,255,0.5),
+                inset -2px -2px 5px rgba(0,0,0,0.2);
+        }
+
+        .status-content strong {
+            display: block;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           Rejected & Waiting Boxes (3D)
+        ========================= */
+        .rejected-box, .waiting-box, .current-status {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--bg-color);
+            box-shadow: 
+                8px 8px 16px var(--shadow-dark),
+                -8px -8px 16px var(--shadow-light);
+        }
+
+        .current-status {
+            flex-direction: column;
+            text-align: center;
+            background: linear-gradient(145deg, #fff3cd, #ffdf70);
+            box-shadow: 
+                8px 8px 16px rgba(255, 193, 7, 0.2),
+                -8px -8px 16px #ffffff;
+        }
+
+        #statusText {
+            font-size: 24px;
+            font-weight: 900;
+            color: #856404;
+            margin: 10px 0 0;
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.8);
+        }
+
+        .waiting-icon, .rejected-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .waiting-icon {
+            background: #0d6efd;
+            box-shadow: 
+                5px 5px 15px rgba(13, 110, 253, 0.4),
+                inset 2px 2px 5px rgba(255,255,255,0.4);
+        }
+
+        .rejected-icon {
+            background: #dc3545;
+            box-shadow: 
+                5px 5px 15px rgba(220, 53, 69, 0.4),
+                inset 2px 2px 5px rgba(255,255,255,0.4);
+        }
+
+        /* Status Rejected override */
+        .status-rejected {
+            background: #dc3545 !important;
+            color: white !important;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.5), inset 2px 2px 5px rgba(255,255,255,0.4) !important;
+        }
+        .progress-rejected {
+            background: linear-gradient(90deg, #ff4b4b, #c82333) !important;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.5) !important;
+        }
+
+        @media (max-width: 576px) {
+            .tracking-card { padding: 30px 20px; border-radius: 30px; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .robot-wrapper { width: 100px; height: 100px; }
+            .robot { font-size: 55px; }
+            .status-icon { width: 40px; height: 40px; min-width: 40px; font-size: 16px; }
+            .status-item:not(:last-child)::before { right: 18px; top: 40px; }
+        }
     </style>
-
 </head>
-
 
 <body>
 
-
 <div class="page-wrapper">
 
-
-    <!-- ================= HEADER ================= -->
-
     <div class="top-header">
-
         <div class="brand">
-
             <div class="brand-icon">
-
                 <i class="bi bi-robot"></i>
-
             </div>
-
             <div>
-
-                <h5>
-                    رستوران رباتی
-                </h5>
-
-                <small>
-                    سیستم هوشمند ارسال غذا
-                </small>
-
+                <h5>رستوران رباتی</h5>
+                <small style="color: var(--text-muted); font-weight: bold;">سیستم هوشمند ارسال غذا</small>
             </div>
-
         </div>
-
-
         <div class="connection">
-
             <span class="connection-dot"></span>
-
             سیستم آنلاین
-
         </div>
-
     </div>
-
-
-    <!-- ================= CARD ================= -->
 
     <div class="tracking-card">
 
-
-        <!-- Robot -->
-
         <div class="robot-wrapper">
-
-            <div class="robot">
-                🤖
-            </div>
-
+            <div class="robot">🤖</div>
         </div>
 
-
-        <h2 class="order-title">
-
-            پیگیری سفارش
-
-        </h2>
-
-
+        <h2 class="order-title">پیگیری سفارش</h2>
         <div class="order-number">
-
             شماره سفارش
-
-            <strong>
-                #{{ order.id }}
-            </strong>
-
+            <strong style="color: var(--text-main);">#{{ order.id }}</strong>
         </div>
-
-
-        <!-- ================= SUMMARY ================= -->
 
         <div class="summary-grid">
-
-
             <div class="summary-box">
-
                 <span class="summary-label">
-
                     <i class="bi bi-geo-alt-fill"></i>
-
                     شماره میز
-
                 </span>
-
-                <span class="summary-value">
-
-                    میز {{ order.table }}
-
-                </span>
-
+                <span class="summary-value">میز {{ order.table }}</span>
             </div>
-
 
             <div class="summary-box">
-
                 <span class="summary-label">
-
                     <i class="bi bi-receipt"></i>
-
                     مبلغ سفارش
-
                 </span>
-
-                <span class="summary-value">
-
-                    {{ order.total|floatformat:0 }}
-
-                    تومان
-
-                </span>
-
+                <span class="summary-value">{{ order.total|floatformat:0 }} تومان</span>
             </div>
-
-
         </div>
-
-
-        <!-- ================= STATUS ================= -->
 
         <div class="current-status">
-
-            <div class="status-label">
-
-                وضعیت فعلی سفارش
-
-            </div>
-
-
-            <h4 id="statusText">
-
-                در انتظار تایید
-
-            </h4>
-
+            <div style="color: #a37a06; font-weight: bold; font-size: 14px;">وضعیت فعلی سفارش</div>
+            <h4 id="statusText">در انتظار تایید</h4>
         </div>
-        <!-- ================= REJECTED ================= -->
 
-        <div
-            id="rejectedBox"
-            class="rejected-box d-none"
-        >
-        
-            <div class="rejected-icon">
-        
-                <i class="bi bi-x-lg"></i>
-        
-            </div>
-        
+        <div id="rejectedBox" class="rejected-box d-none">
+            <div class="rejected-icon"><i class="bi bi-x-lg"></i></div>
             <div>
-        
-                <h5>
-                    سفارش رد شد
-                </h5>
-        
-                <p>
-                    متأسفانه رستوران امکان آماده‌سازی این سفارش را ندارد.
-                </p>
-        
-                <small>
-                    لطفاً در صورت نیاز سفارش دیگری ثبت کنید.
-                </small>
-        
+                <h5 style="margin: 0 0 5px; font-weight: 800;">سفارش رد شد</h5>
+                <p style="margin: 0; font-size: 14px;">متأسفانه رستوران امکان آماده‌سازی این سفارش را ندارد.</p>
             </div>
-        
         </div>
-
-        <!-- ================= PROGRESS ================= -->
 
         <div class="progress-section">
-
-
             <div class="progress-info">
-
-                <span>
-                    میزان پیشرفت سفارش
-                </span>
-
-
-                <strong id="progressPercent">
-
-                    20%
-
-                </strong>
-
+                <span style="color: var(--text-muted);">میزان پیشرفت سفارش</span>
+                <strong id="progressPercent">20%</strong>
             </div>
-
-
             <div class="progress">
-
-                <div
-                    id="progressBar"
-                    class="progress-bar"
-                    style="width:20%"
-                >
-
-                </div>
-
+                <div id="progressBar" class="progress-bar" style="width:20%"></div>
             </div>
-
-
         </div>
-
-
-        <!-- ================= WAITING ================= -->
 
         <div class="waiting-box">
-
-
-            <div class="waiting-icon">
-
-                <i class="bi bi-clock"></i>
-
+            <div class="waiting-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                <small style="color: var(--text-muted); font-weight: bold;">زمان تقریبی باقی‌مانده</small>
+                <div id="waitingTime" style="font-size: 20px; font-weight: 900; color: #0d6efd;">15 دقیقه</div>
             </div>
-
-
-            <div class="waiting-text">
-
-                <small>
-                    زمان تقریبی باقی‌مانده
-                </small>
-
-
-                <strong id="waitingTime">
-
-                    15 دقیقه
-
-                </strong>
-
-            </div>
-
-
         </div>
 
-
-        <!-- ================= TIMELINE ================= -->
-
-        <h5 class="timeline-title">
-
-            روند سفارش
-
-        </h5>
-
-
+        <h5 class="timeline-title">روند سفارش</h5>
         <div class="timeline">
 
-
-            <!-- NEW -->
-
             <div class="status-item">
-
-                <div
-                    id="iconNew"
-                    class="status-icon status-done"
-                >
-
-                    ✓
-
-                </div>
-
-
+                <div id="iconNew" class="status-icon status-done">✓</div>
                 <div class="status-content">
-
-                    <strong>
-                        سفارش ثبت شد
-                    </strong>
-
-                    <small>
-                        سفارش شما با موفقیت دریافت شد
-                    </small>
-
+                    <strong>سفارش ثبت شد</strong>
+                    <small>سفارش شما با موفقیت دریافت شد</small>
                 </div>
-
             </div>
 
-
-            <!-- ACCEPTED -->
-
             <div class="status-item">
-
-                <div
-                    id="iconAccepted"
-                    class="status-icon"
-                >
-
-                    2
-
-                </div>
-
-
+                <div id="iconAccepted" class="status-icon">2</div>
                 <div class="status-content">
-
-                    <strong>
-                        تایید سفارش
-                    </strong>
-
-                    <small>
-                        رستوران در حال بررسی سفارش است
-                    </small>
-
+                    <strong>تایید سفارش</strong>
+                    <small>رستوران در حال بررسی سفارش است</small>
                 </div>
-
             </div>
 
-
-            <!-- COOKING -->
-
             <div class="status-item">
-
-                <div
-                    id="iconCooking"
-                    class="status-icon"
-                >
-
-                    3
-
-                </div>
-
-
+                <div id="iconCooking" class="status-icon">3</div>
                 <div class="status-content">
-
-                    <strong>
-                        آماده‌سازی غذا
-                    </strong>
-
-                    <small>
-                        آشپزخانه در حال آماده کردن غذاست
-                    </small>
-
+                    <strong>آماده‌سازی غذا</strong>
+                    <small>آشپزخانه در حال آماده کردن غذاست</small>
                 </div>
-
             </div>
 
-
-            <!-- SENT -->
-
             <div class="status-item">
-
-                <div
-                    id="iconSent"
-                    class="status-icon"
-                >
-
-                    4
-
-                </div>
-
-
+                <div id="iconSent" class="status-icon">4</div>
                 <div class="status-content">
-
-                    <strong>
-                        ارسال با ربات
-                    </strong>
-
-                    <small>
-                        ربات سفارش شما را حمل می‌کند
-                    </small>
-
+                    <strong>ارسال با ربات</strong>
+                    <small>ربات سفارش شما را حمل می‌کند</small>
                 </div>
-
             </div>
 
-
-            <!-- DONE -->
-
             <div class="status-item">
-
-                <div
-                    id="iconDone"
-                    class="status-icon"
-                >
-
-                    5
-
-                </div>
-
-
+                <div id="iconDone" class="status-icon">5</div>
                 <div class="status-content">
-
-                    <strong>
-                        تحویل سفارش
-                    </strong>
-
-                    <small>
-                        سفارش به میز شما تحویل داده می‌شود
-                    </small>
-
+                    <strong>تحویل سفارش</strong>
+                    <small>سفارش به میز شما تحویل داده می‌شود</small>
                 </div>
-
             </div>
-
 
         </div>
-
-
-        <div class="footer-message">
-
-            <i class="bi bi-info-circle"></i>
-
-            وضعیت سفارش شما به صورت خودکار به‌روزرسانی می‌شود.
-
-        </div>
-
 
     </div>
-
 </div>
 
-
 <script>
-
-const orderId = {{ order.id }};
-
+const orderId = "{{ order.id|default:'123' }}"; // Added fallback for local testing
 
 async function updateOrderStatus() {
-
     try {
-
-        const response =
-            await fetch(
-                `/api/orders/${orderId}/`
-            );
-
-
-        if (!response.ok) {
-
-            return;
-
-        }
-
-
-        const order =
-            await response.json();
-
-
-        updateProgress(
-            order.status
-        );
-
-
+        const response = await fetch(`/api/orders/${orderId}/`);
+        if (!response.ok) return;
+        const order = await response.json();
+        updateProgress(order.status);
     } catch (error) {
-
         console.error(error);
-
     }
-
 }
 
-
-
 function updateProgress(status) {
+    const steps = ["new", "accepted", "cooking", "sent", "done"];
+    const stepIcons = ["iconNew", "iconAccepted", "iconCooking", "iconSent", "iconDone"];
 
-    const steps = [
-        "new",
-        "accepted",
-        "cooking",
-        "sent",
-        "done"
-    ];
-
-    const stepIcons = [
-        "iconNew",
-        "iconAccepted",
-        "iconCooking",
-        "iconSent",
-        "iconDone"
-    ];
-
-
-    /* =========================
-       حالت رد شدن سفارش
-    ========================= */
-
-    const rejectedBox =
-        document.getElementById("rejectedBox");
-
-    const progressBar =
-        document.getElementById("progressBar");
-
-    const statusText =
-        document.getElementById("statusText");
-
-    const progressPercent =
-        document.getElementById("progressPercent");
-
-    const waitingTime =
-        document.getElementById("waitingTime");
-
+    const rejectedBox = document.getElementById("rejectedBox");
+    const progressBar = document.getElementById("progressBar");
+    const statusText = document.getElementById("statusText");
+    const progressPercent = document.getElementById("progressPercent");
+    const waitingTime = document.getElementById("waitingTime");
 
     if (status === "rejected") {
+        if (rejectedBox) rejectedBox.classList.remove("d-none");
+        statusText.innerText = "سفارش رد شد";
+        statusText.style.color = "#dc3545";
+        progressPercent.innerText = "0%";
+        progressBar.style.width = "100%";
+        progressBar.classList.add("progress-rejected");
+        waitingTime.innerText = "لغو شده";
+        waitingTime.style.color = "#dc3545";
 
-        /*
-         * نمایش کارت قرمز
-         */
-
-        if (rejectedBox) {
-
-            rejectedBox.classList.remove(
-                "d-none"
-            );
-
-        }
-
-
-        /*
-         * وضعیت اصلی
-         */
-
-        statusText.innerText =
-            "سفارش رد شد";
-
-
-        statusText.style.color =
-            "#dc3545";
-
-
-        /*
-         * درصد
-         */
-
-        progressPercent.innerText =
-            "0%";
-
-
-        /*
-         * نوار پیشرفت
-         */
-
-        progressBar.style.width =
-            "100%";
-
-
-        progressBar.classList.remove(
-            "bg-warning"
-        );
-
-
-        progressBar.classList.add(
-            "progress-rejected"
-        );
-
-
-        /*
-         * زمان
-         */
-
-        waitingTime.innerText =
-            "امکان آماده‌سازی سفارش وجود ندارد";
-
-
-        waitingTime.style.color =
-            "#dc3545";
-
-
-        /*
-         * Timeline
-         */
-
-        stepIcons.forEach(
-            (iconId, i) => {
-
-                const icon =
-                    document.getElementById(
-                        iconId
-                    );
-
-
-                if (!icon) {
-                    return;
-                }
-
-
-                icon.classList.remove(
-                    "status-done",
-                    "status-active"
-                );
-
-
-                /*
-                 * مرحله اول انجام شده
-                 */
-
-                if (i === 0) {
-
-                    icon.classList.add(
-                        "status-done"
-                    );
-
-                    icon.innerText =
-                        "✓";
-
-                    return;
-                }
-
-
-                /*
-                 * مراحل بعدی رد شده‌اند
-                 */
-
-                icon.classList.add(
-                    "status-rejected"
-                );
-
-                icon.innerText =
-                    "×";
-
+        stepIcons.forEach((iconId, i) => {
+            const icon = document.getElementById(iconId);
+            if (!icon) return;
+            icon.classList.remove("status-done", "status-active");
+            if (i === 0) {
+                icon.classList.add("status-done");
+                icon.innerText = "✓";
+            } else {
+                icon.classList.add("status-rejected");
+                icon.innerText = "×";
             }
-        );
-
-
+        });
         return;
     }
 
+    if (rejectedBox) rejectedBox.classList.add("d-none");
+    statusText.style.color = "#856404";
+    waitingTime.style.color = "#0d6efd";
+    progressBar.classList.remove("progress-rejected");
 
-    /* =========================
-       حالت عادی
-    ========================= */
+    const index = steps.indexOf(status);
+    const currentIndex = index >= 0 ? index : 0;
 
-
-    if (rejectedBox) {
-
-        rejectedBox.classList.add(
-            "d-none"
-        );
-
-    }
-
-
-    statusText.style.color =
-        "#664d03";
-
-
-    waitingTime.style.color =
-        "#0d6efd";
-
-
-    progressBar.classList.remove(
-        "progress-rejected"
-    );
-
-
-    progressBar.classList.add(
-        "bg-warning"
-    );
-
-
-    const index =
-        steps.indexOf(status);
-
-
-    const currentIndex =
-        index >= 0 ? index : 0;
-
-
-    const percentages = {
-
-        new: 20,
-
-        accepted: 40,
-
-        cooking: 60,
-
-        sent: 80,
-
-        done: 100
-
-    };
-
-
+    const percentages = { new: 20, accepted: 40, cooking: 60, sent: 80, done: 100 };
     const texts = {
-
-        new:
-            "در انتظار تایید",
-
-        accepted:
-            "سفارش تایید شد",
-
-        cooking:
-            "غذا در حال آماده‌سازی است",
-
-        sent:
-            "ربات در حال حرکت است",
-
-        done:
-            "سفارش تحویل داده شد"
-
+        new: "در انتظار تایید",
+        accepted: "سفارش تایید شد",
+        cooking: "در حال پخت",
+        sent: "ربات در مسیر است",
+        done: "نوش جان!"
     };
-
-
     const times = {
-
-        new:
-            "15 دقیقه",
-
-        accepted:
-            "12 دقیقه",
-
-        cooking:
-            "8 دقیقه",
-
-        sent:
-            "3 دقیقه",
-
-        done:
-            "تحویل شد"
-
+        new: "15 دقیقه",
+        accepted: "12 دقیقه",
+        cooking: "8 دقیقه",
+        sent: "3 دقیقه",
+        done: "تحویل شد"
     };
 
+    const percent = percentages[status] || 20;
+    statusText.innerText = texts[status] || texts.new;
+    progressPercent.innerText = percent + "%";
+    progressBar.style.width = percent + "%";
+    waitingTime.innerText = times[status] || times.new;
 
-    const percent =
-        percentages[status] || 20;
-
-
-    statusText.innerText =
-        texts[status] || texts.new;
-
-
-    progressPercent.innerText =
-        percent + "%";
-
-
-    progressBar.style.width =
-        percent + "%";
-
-
-    waitingTime.innerText =
-        times[status] || times.new;
-
-
-    /*
-     * Timeline عادی
-     */
-
-    stepIcons.forEach(
-        (iconId, i) => {
-
-            const icon =
-                document.getElementById(
-                    iconId
-                );
-
-
-            if (!icon) {
-                return;
-            }
-
-
-            icon.classList.remove(
-                "status-done",
-                "status-active",
-                "status-rejected"
-            );
-
-
-            if (i < currentIndex) {
-
-                icon.classList.add(
-                    "status-done"
-                );
-
-                icon.innerText =
-                    "✓";
-
-            }
-
-            else if (i === currentIndex) {
-
-                icon.classList.add(
-                    "status-active"
-                );
-
-                icon.innerText =
-                    i + 1;
-
-            }
-
-            else {
-
-                icon.innerText =
-                    i + 1;
-
-            }
-
+    stepIcons.forEach((iconId, i) => {
+        const icon = document.getElementById(iconId);
+        if (!icon) return;
+        icon.classList.remove("status-done", "status-active", "status-rejected");
+        
+        if (i < currentIndex) {
+            icon.classList.add("status-done");
+            icon.innerText = "✓";
+        } else if (i === currentIndex) {
+            icon.classList.add("status-active");
+            icon.innerText = i + 1;
+        } else {
+            icon.innerText = i + 1;
         }
-    );
-
+    });
 }
 
-
-// اولین دریافت
-
 updateOrderStatus();
-
-
-// به‌روزرسانی هر 3 ثانیه
-
-setInterval(
-    updateOrderStatus,
-    3000
-);
-
+setInterval(updateOrderStatus, 3000);
 </script>
 
-
 </body>
-
 </html>

@@ -6,7 +6,7 @@ from django.utils import timezone
 
 import json
 
-from .models import Order, OrderItem, Food
+from .models import Order, OrderItem, Food, Category
 
 
 # =========================================================
@@ -39,22 +39,59 @@ def order_tracking(request, id):
 
 def get_foods(request):
 
-    foods = Food.objects.all().order_by("id")
+    categories = Category.objects.prefetch_related(
+        "foods"
+    )
 
-    data = []
 
-    for food in foods:
+    result=[]
 
-        data.append({
-            "id": food.id,
-            "name": food.name,
-            "price": food.price,
-            "stock": food.stock,
-            "image": food.image.url if food.image else ""
+
+    for category in categories:
+
+        foods=[]
+
+
+        for food in category.foods.all():
+            foods.append({
+
+                "id": food.id,
+
+                "name": food.name,
+
+                "description": food.description,
+
+                "price": food.price,
+
+                "stock": food.stock,
+
+                "category": category.name,
+
+                "image":
+                    food.image.url
+                    if food.image
+                    else ""
+
+            })
+
+
+        result.append({
+
+            "id": category.id,
+
+            "name": category.name,
+
+            "icon": category.icon,
+
+            "foods": foods
+
         })
 
-    return JsonResponse(data, safe=False)
 
+    return JsonResponse(
+        result,
+        safe=False
+    )
 
 # =========================================================
 # ایجاد غذا + عکس
@@ -62,7 +99,6 @@ def get_foods(request):
 
 @csrf_exempt
 def create_food(request):
-
     if request.method != "POST":
         return JsonResponse(
             {
@@ -77,6 +113,9 @@ def create_food(request):
         name = request.POST.get("name", "").strip()
         price = request.POST.get("price", "0")
         stock = request.POST.get("stock", "0")
+
+        # ۱. دریافت شناسه دسته‌بندی از فرانت‌اند
+        category_id = request.POST.get("category_id")
 
         image = request.FILES.get("image")
 
@@ -93,16 +132,27 @@ def create_food(request):
                 status=400
             )
 
+        # ۲. بررسی اینکه دسته‌بندی انتخاب شده باشد
+        if not category_id:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "لطفاً دسته‌بندی غذا را انتخاب کنید."
+                },
+                status=400
+            )
+
         try:
             price = int(price)
             stock = int(stock)
+            category_id = int(category_id)
 
         except (ValueError, TypeError):
 
             return JsonResponse(
                 {
                     "success": False,
-                    "error": "قیمت یا موجودی نامعتبر است."
+                    "error": "اطلاعات وارد شده نامعتبر است."
                 },
                 status=400
             )
@@ -125,11 +175,25 @@ def create_food(request):
                 status=400
             )
 
+        # ۳. بررسی وجود داشتن دسته در دیتابیس
+        try:
+            category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "دسته‌بندی انتخاب شده وجود ندارد."
+                },
+                status=404
+            )
+
         # -------------------------
         # ایجاد غذا
         # -------------------------
 
+        # ۴. ارسال category به مدل Food
         food = Food.objects.create(
+            category=category,
             name=name,
             price=price,
             stock=stock,
@@ -142,6 +206,7 @@ def create_food(request):
                 "food": {
                     "id": food.id,
                     "name": food.name,
+                    "category": food.category.name,
                     "price": food.price,
                     "stock": food.stock,
                     "image": food.image.url if food.image else ""
@@ -158,7 +223,6 @@ def create_food(request):
             },
             status=500
         )
-
 
 # =========================================================
 # ویرایش غذا
@@ -813,6 +877,50 @@ def send_order(request, id):
 
 
 # =========================================================
+# دریافت دسته‌بندی‌ها
+# =========================================================
+
+def get_categories(request):
+    categories = Category.objects.all()
+    result = []
+    for cat in categories:
+        result.append({
+            "id": cat.id,
+            "name": cat.name,
+            "icon": cat.icon
+        })
+    return JsonResponse(result, safe=False)
+
+
+# =========================================================
+# ایجاد دسته‌بندی جدید
+# =========================================================
+
+@csrf_exempt
+def create_category(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "POST only"}, status=405)
+
+    try:
+        name = request.POST.get("name", "").strip()
+        icon = request.POST.get("icon", "🍽").strip()
+
+        if not name:
+            return JsonResponse({"success": False, "error": "نام دسته وارد نشده است."}, status=400)
+
+        category = Category.objects.create(name=name, icon=icon)
+
+        return JsonResponse({
+            "success": True,
+            "category": {
+                "id": category.id,
+                "name": category.name,
+                "icon": category.icon
+            }
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+# =========================================================
 # دریافت اطلاعات یک سفارش
 # برای صفحه Tracking مشتری
 # =========================================================
@@ -965,3 +1073,4 @@ def get_order(request, id):
                 order.status == "rejected"
         }
     )
+
