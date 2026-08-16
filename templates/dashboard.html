@@ -4,730 +4,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>پنل مدیریت سفارش‌ها</title>
+    <title>Midnight Kitchen Pro | پنل مدیریت رستوران</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-
-    <style>
-        /* =====================================================
-           توکن‌های طراحی — سامانه مدیریت سفارش (Commercial Ops UI)
-        ===================================================== */
-        :root {
-            --ink: #1B1F27;
-            --ink-2: #242A35;
-            --ink-line: rgba(255, 255, 255, 0.09);
-            --ink-muted: #9BA3B4;
-
-            --paper: #F5F2EA;
-            --surface: #FFFFFF;
-            --line: #E6E1D3;
-
-            --text-main: #1B1F27;
-            --text-muted: #6E7180;
-
-            --saffron: #D98E04;
-            --saffron-deep: #AD7104;
-            --saffron-tint: #FBF0D9;
-
-            --basil: #2F6B4F;
-            --basil-tint: #E4F0EA;
-
-            --rust: #C4432B;
-            --rust-tint: #FAE7E2;
-
-            --slate: #3E6FA6;
-            --slate-tint: #E7EFF7;
-
-            --radius: 12px;
-            --radius-sm: 8px;
-            --shadow-card: 0 1px 2px rgba(27, 31, 39, 0.04), 0 8px 24px -12px rgba(27, 31, 39, 0.12);
-        }
-
-        * { font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif; }
-        .mono, .stat-value, .order-id, .order-price, .time-chip, .food-price-cell {
-            font-family: 'JetBrains Mono', 'Vazirmatn', monospace;
-        }
-
-        body {
-            background-color: var(--paper);
-            color: var(--text-main);
-        }
-
-        a { text-decoration: none; }
-
-        /* =====================================================
-           نوار بالایی
-        ===================================================== */
-        .app-header {
-            background-color: var(--surface);
-            border-bottom: 1px solid var(--line);
-            padding: 16px 24px;
-        }
-
-        .app-header .brand-mark {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: linear-gradient(155deg, var(--saffron) 0%, var(--saffron-deep) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 1.15rem;
-            flex-shrink: 0;
-        }
-
-        .app-header h4 {
-            font-weight: 800;
-            letter-spacing: -0.01em;
-            color: var(--text-main);
-        }
-
-        .app-header .subtitle {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-        }
-
-        .live-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--basil);
-            background: var(--basil-tint);
-            padding: 6px 12px;
-            border-radius: 999px;
-        }
-        .live-pill .dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--basil);
-            box-shadow: 0 0 0 0 rgba(47,107,79,.5);
-            animation: pulse-dot 2s infinite;
-        }
-        @keyframes pulse-dot {
-            0% { box-shadow: 0 0 0 0 rgba(47,107,79,.45); }
-            70% { box-shadow: 0 0 0 7px rgba(47,107,79,0); }
-            100% { box-shadow: 0 0 0 0 rgba(47,107,79,0); }
-        }
-
-        /* دکمه همبرگری (فقط موبایل/تبلت) */
-        .btn-hamburger {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            width: 42px;
-            height: 42px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            transition: 0.2s;
-        }
-        .btn-hamburger:hover { background: var(--paper); border-color: var(--saffron); color: var(--saffron); }
-
-        /* =====================================================
-           سایدبار ثابت (دسکتاپ) + آفکانواس (موبایل)
-        ===================================================== */
-        .app-shell {
-            display: flex;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
-
-        .side-rail {
-            display: none;
-        }
-
-        @media (min-width: 992px) {
-            .side-rail {
-                display: flex;
-                flex-direction: column;
-                width: 232px;
-                min-height: 100vh;
-                background-color: var(--ink);
-                border-left: 1px solid var(--ink-line);
-                position: sticky;
-                top: 0;
-                flex-shrink: 0;
-            }
-            .btn-hamburger.d-lg-inline-flex-none { display: none !important; }
-        }
-
-        .side-rail .rail-brand {
-            padding: 22px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--ink-line);
-        }
-        .side-rail .rail-brand span {
-            color: #fff;
-            font-weight: 800;
-            font-size: 1.02rem;
-        }
-
-        .side-rail .rail-nav { padding: 16px 12px; }
-
-        .rail-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--ink-muted);
-            padding: 11px 14px;
-            border-radius: var(--radius-sm);
-            font-size: 0.92rem;
-            font-weight: 500;
-            margin-bottom: 4px;
-            border: 1px solid transparent;
-            transition: all 0.18s ease;
-            cursor: pointer;
-        }
-        .rail-link i { font-size: 1.05rem; width: 20px; text-align: center; }
-        .rail-link:hover { background: var(--ink-2); color: #fff; }
-        .rail-link.active {
-            background: var(--saffron);
-            color: #1B1F27;
-            font-weight: 700;
-        }
-
-        .side-rail .rail-foot {
-            margin-top: auto;
-            padding: 16px 20px;
-            border-top: 1px solid var(--ink-line);
-            font-size: 0.74rem;
-            color: var(--ink-muted);
-        }
-
-        /* آفکانواس موبایل */
-        .offcanvas {
-            background-color: var(--ink);
-            border-left: 1px solid var(--ink-line);
-            width: 260px;
-        }
-        .offcanvas-header { border-bottom: 1px solid var(--ink-line); }
-        .offcanvas .rail-link { color: var(--ink-muted); }
-        .offcanvas .rail-link:hover { background: var(--ink-2); color: #fff; }
-        .offcanvas .rail-link.active { background: var(--saffron); color: #1B1F27; }
-
-        /* =====================================================
-           محتوای اصلی
-        ===================================================== */
-        .main-col { flex: 1; min-width: 0; }
-        .content-area { padding: 28px 24px 48px; max-width: 1280px; margin: 0 auto; }
-
-        .section-title {
-            font-weight: 800;
-            font-size: 1.02rem;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-        .section-title i { color: var(--saffron); font-size: 1.05rem; }
-        .section-title .count-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            background: var(--paper);
-            border: 1px solid var(--line);
-            padding: 2px 9px;
-            border-radius: 999px;
-            margin-right: auto;
-        }
-
-        /* کارت پایه */
-        .card {
-            background-color: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            color: var(--text-main);
-            box-shadow: var(--shadow-card);
-        }
-
-        /* کارت‌های آمار */
-        .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-card);
-            padding: 18px 18px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            height: 100%;
-        }
-        .stat-card .stat-icon {
-            width: 42px; height: 42px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        .stat-icon.tone-basil { background: var(--basil-tint); color: var(--basil); }
-        .stat-icon.tone-saffron { background: var(--saffron-tint); color: var(--saffron-deep); }
-        .stat-icon.tone-slate { background: var(--slate-tint); color: var(--slate); }
-        .stat-icon.tone-rust { background: var(--rust-tint); color: var(--rust); }
-
-        .stat-card .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 2px; }
-        .stat-card .stat-value { font-size: 1.28rem; font-weight: 700; line-height: 1.1; }
-
-        /* =====================================================
-           تیکت سفارش — عنصر امضادار طراحی
-           نوار رنگی کنار کارت، وضعیت زمانی سفارش را نشان می‌دهد
-        ===================================================== */
-        .order-column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-height: 640px;
-            overflow-y: auto;
-            padding-left: 4px;
-        }
-        .order-column::-webkit-scrollbar { width: 6px; }
-        .order-column::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
-
-        .order-ticket {
-            position: relative;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            padding: 14px 16px 14px 14px;
-            padding-right: 20px;
-            overflow: hidden;
-        }
-        .order-ticket::before {
-            content: "";
-            position: absolute;
-            top: 0; right: 0; bottom: 0;
-            width: 4px;
-            background: var(--saffron);
-        }
-        .order-ticket.is-urgent::before { background: var(--rust); }
-        .order-ticket.is-ready::before { background: var(--basil); }
-
-        .order-ticket .order-id {
-            font-size: 0.76rem;
-            color: var(--text-muted);
-            letter-spacing: 0.02em;
-        }
-        .order-ticket .order-table {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--text-main);
-        }
-        .time-chip {
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 2px 9px;
-            border-radius: 999px;
-            background: var(--paper);
-            color: var(--text-muted);
-            border: 1px solid var(--line);
-        }
-
-        /* =====================================================
-           پنل ارسال و تحویل
-        ===================================================== */
-        .robot-panel {
-            padding: 26px;
-        }
-        .dispatch-station {
-            text-align: center;
-            padding: 22px 16px 24px;
-            background: linear-gradient(180deg, var(--paper) 0%, var(--surface) 100%);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            margin-bottom: 22px;
-        }
-        .dispatch-station .station-icon {
-            width: 64px; height: 64px;
-            border-radius: 16px;
-            background: var(--ink);
-            color: var(--saffron);
-            display: inline-flex;
-            align-items: center; justify-content: center;
-            font-size: 1.7rem;
-            margin-bottom: 10px;
-        }
-        .dispatch-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 2px;
-            border-bottom: 1px dashed var(--line);
-            font-size: 0.9rem;
-        }
-        .dispatch-row:last-of-type { border-bottom: none; }
-        .dispatch-row .label { color: var(--text-muted); }
-        .dispatch-row .value { font-weight: 700; }
-
-        .delivery-log-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 11px 4px;
-            border-bottom: 1px solid var(--line);
-            font-size: 0.86rem;
-        }
-        .delivery-log-item:last-child { border-bottom: none; }
-        .delivery-log-item .tag {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            background: var(--paper);
-            border: 1px solid var(--line);
-            padding: 2px 8px;
-            border-radius: 999px;
-        }
-
-        /* =====================================================
-           جدول منو
-        ===================================================== */
-        .table { color: var(--text-main); border-color: var(--line); vertical-align: middle; }
-        .table > :not(caption) > * > * { background-color: transparent; }
-        thead th {
-            background-color: var(--paper) !important;
-            color: var(--text-muted) !important;
-            font-size: 0.76rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            border-bottom: 1px solid var(--line) !important;
-            padding: 12px 10px;
-        }
-        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--line); }
-        .table-hover tbody tr:hover { background-color: var(--paper); }
-
-        .food-thumb {
-            width: 46px; height: 46px;
-            border-radius: 9px;
-            object-fit: cover;
-            border: 1px solid var(--line);
-        }
-
-        .status-tag {
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 4px 11px;
-            border-radius: 999px;
-        }
-        .status-tag.available { background: var(--basil-tint); color: var(--basil); }
-        .status-tag.out { background: var(--rust-tint); color: var(--rust); }
-
-        .icon-btn {
-            width: 32px; height: 32px;
-            border-radius: 8px;
-            border: 1px solid var(--line);
-            background: var(--surface);
-            color: var(--text-muted);
-            display: inline-flex; align-items: center; justify-content: center;
-            transition: 0.15s;
-        }
-        .icon-btn:hover { border-color: var(--saffron); color: var(--saffron-deep); background: var(--saffron-tint); }
-
-        .food-stock .stock-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 2px;
-            border-bottom: 1px solid var(--line);
-            font-size: 0.88rem;
-        }
-        .food-stock .stock-row:last-child { border-bottom: none; }
-
-        .btn-primary-brand {
-            background: var(--saffron);
-            border: 1px solid var(--saffron);
-            color: #1B1F27;
-            font-weight: 700;
-        }
-        .btn-primary-brand:hover { background: var(--saffron-deep); border-color: var(--saffron-deep); color: #fff; }
-
-        .btn-outline-brand {
-            border: 1px solid var(--line);
-            color: var(--text-main);
-            background: var(--surface);
-            font-weight: 600;
-        }
-        .btn-outline-brand:hover { border-color: var(--saffron); color: var(--saffron-deep); background: var(--saffron-tint); }
-
-        /* مودال‌ها */
-        .modal-content {
-            background-color: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            color: var(--text-main);
-        }
-        .modal-header, .modal-footer { border-color: var(--line); }
-        .modal-title { color: var(--text-main); font-weight: 800; }
-        .modal-title i { color: var(--saffron-deep); }
-        .btn-close { filter: none; }
-
-        .form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
-        .form-control, .form-select {
-            background-color: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--text-main);
-            border-radius: var(--radius-sm);
-        }
-        .form-control:focus, .form-select:focus {
-            background-color: var(--surface);
-            border-color: var(--saffron);
-            box-shadow: 0 0 0 3px var(--saffron-tint);
-            color: var(--text-main);
-        }
-
-        .alert-dark {
-            background: var(--saffron-tint);
-            border: 1px solid var(--saffron);
-            color: #7A5203;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .live-pill .dot { animation: none; }
-        }
-    </style>
+    <link rel="stylesheet" href="../static/css/dashboard.css">
 </head>
 <body>
 
+<!-- پس‌زمینه‌ی متحرک -->
+<div class="bg-scene">
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+</div>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
 <div class="app-shell">
 
-    <!-- سایدبار ثابت دسکتاپ -->
-    <aside class="side-rail">
-        <div class="rail-brand">
-            <div class="app-header brand-mark" style="padding:0;"><i class="bi bi-shop"></i></div>
-            <span>پنل مدیریت سفارش</span>
+    <!-- سایدبار -->
+    <aside class="sidebar" id="appSidebar">
+        <div class="sidebar-brand">
+            <div class="mark"><i class="bi bi-egg-fried"></i></div>
+            <div class="brand-text">Midnight Kitchen <small>پنل مدیریت رستوران</small></div>
         </div>
-        <nav class="rail-nav" id="v-pills-tab-desktop">
-            <div class="rail-link active" data-bs-toggle="pill" data-bs-target="#nav-dashboard" data-sync="nav-dashboard-tab">
-                <i class="bi bi-speedometer2"></i> داشبورد و سفارش‌ها
+
+        <nav class="sidebar-nav">
+            <div class="nav-item active" data-section-target="dashboard">
+                <i class="bi bi-grid-1x2-fill"></i> <span class="nav-label">داشبورد</span>
             </div>
-            <div class="rail-link" data-bs-toggle="pill" data-bs-target="#nav-robot" data-sync="nav-robot-tab">
-                <i class="bi bi-truck"></i> وضعیت ارسال
+            <div class="nav-item" data-section-target="orders">
+                <i class="bi bi-receipt-cutoff"></i> <span class="nav-label">سفارش‌ها</span>
             </div>
-            <div class="rail-link" data-bs-toggle="pill" data-bs-target="#nav-menu" data-sync="nav-menu-tab">
-                <i class="bi bi-journal-richtext"></i> مدیریت منو و موجودی
+            <div class="nav-item" data-section-target="cooking">
+                <i class="bi bi-fire"></i> <span class="nav-label">آشپزخانه</span>
+            </div>
+            <div class="nav-item" data-section-target="menu">
+                <i class="bi bi-journal-richtext"></i> <span class="nav-label">منو</span>
+            </div>
+            <div class="nav-item" data-section-target="inventory">
+                <i class="bi bi-box-seam"></i> <span class="nav-label">انبار</span>
+            </div>
+            <div class="nav-item" data-section-target="analytics">
+                <i class="bi bi-bar-chart-line-fill"></i> <span class="nav-label">تحلیل‌ها</span>
+            </div>
+            <div class="nav-item" data-section-target="settings">
+                <i class="bi bi-gear-fill"></i> <span class="nav-label">تنظیمات</span>
             </div>
         </nav>
-        <div class="rail-foot">نسخه پنل ۲.۰ — بروزرسانی زنده</div>
+
+        <div class="sidebar-foot">نسخه ۳.۰ — Midnight Kitchen Pro</div>
     </aside>
 
-    <div class="main-col">
-        <header class="app-header sticky-top">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                    <button class="btn-hamburger d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainMenuOffcanvas" aria-controls="mainMenuOffcanvas">
-                        <i class="bi bi-list"></i>
-                    </button>
-                    <div class="d-flex align-items-center gap-2 d-lg-none">
-                        <div class="brand-mark"><i class="bi bi-shop"></i></div>
-                    </div>
-                    <div>
-                        <h4 class="mb-0">پنل مدیریت سفارش‌ها</h4>
-                        <div class="subtitle">مدیریت سفارش‌ها، منو و وضعیت ارسال</div>
-                    </div>
-                </div>
+    <!-- محتوای اصلی -->
+    <div class="main-col" id="mainCol">
 
-                <div class="d-none d-md-flex align-items-center gap-2">
-                    <span class="live-pill"><span class="dot"></span> اتصال برقرار است</span>
+        <header class="app-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle" type="button">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div>
+                    <h1 class="header-title">پنل مدیریت رستوران</h1>
+                    <div class="header-sub">مدیریت سفارش، آشپزخانه، منو و انبار</div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <span class="status-pill"><span class="dot"></span> رستوران باز است</span>
+                <span class="clock-pill"><i class="bi bi-clock"></i> <span id="headerClock">--:--:--</span></span>
+                <div class="admin-chip">
+                    <div class="avatar">A</div>
+                    <div>
+                        <div class="name">مدیر رستوران</div>
+                        <div class="role">دسترسی کامل</div>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <!-- آفکانواس موبایل -->
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="mainMenuOffcanvas">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title text-white"><i class="bi bi-shop text-warning"></i> پنل مدیریت سفارش</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-                <div class="nav flex-column" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                    <button class="nav-link rail-link active text-start" id="nav-dashboard-tab" data-bs-toggle="pill" data-bs-target="#nav-dashboard" type="button" role="tab" aria-controls="nav-dashboard" aria-selected="true">
-                        <i class="bi bi-speedometer2 me-2"></i> داشبورد و سفارش‌ها
-                    </button>
-                    <button class="nav-link rail-link text-start" id="nav-robot-tab" data-bs-toggle="pill" data-bs-target="#nav-robot" type="button" role="tab" aria-controls="nav-robot" aria-selected="false">
-                        <i class="bi bi-truck me-2"></i> وضعیت ارسال
-                    </button>
-                    <button class="nav-link rail-link text-start" id="nav-menu-tab" data-bs-toggle="pill" data-bs-target="#nav-menu" type="button" role="tab" aria-controls="nav-menu" aria-selected="false">
-                        <i class="bi bi-journal-richtext me-2"></i> مدیریت منو و موجودی
-                    </button>
-                </div>
-            </div>
-        </div>
+        <main class="content">
 
-        <div class="content-area">
-            <div class="tab-content" id="v-pills-tabContent">
-
-                <!-- داشبورد -->
-                <div class="tab-pane fade show active" id="nav-dashboard" role="tabpanel" aria-labelledby="nav-dashboard-tab">
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3 col-sm-6">
-                            <div class="stat-card">
-                                <div class="stat-icon tone-basil"><i class="bi bi-check2-circle"></i></div>
-                                <div>
-                                    <div class="stat-label">وضعیت سیستم</div>
-                                    <div class="stat-value">فعال</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <div class="stat-card">
-                                <div class="stat-icon tone-saffron"><i class="bi bi-clock-history"></i></div>
-                                <div>
-                                    <div class="stat-label">میانگین زمان آماده‌سازی</div>
-                                    <div class="stat-value">۱۸ دقیقه</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <div class="stat-card">
-                                <div class="stat-icon tone-slate"><i class="bi bi-truck"></i></div>
-                                <div>
-                                    <div class="stat-label">در صف ارسال</div>
-                                    <div class="stat-value">آماده</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <div class="stat-card">
-                                <div class="stat-icon tone-rust"><i class="bi bi-list-check"></i></div>
-                                <div>
-                                    <div class="stat-label">سفارش فعال</div>
-                                    <div class="stat-value" id="activeOrdersCount">0</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-lg-6">
-                            <div class="card p-3 h-100">
-                                <h4 class="section-title">
-                                    <i class="bi bi-bell-fill"></i> سفارش‌های جدید
-                                </h4>
-                                <div class="order-column" id="ordersContainer">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6">
-                            <div class="card p-3 h-100">
-                                <h4 class="section-title">
-                                    <i class="bi bi-fire"></i> در حال آماده‌سازی
-                                </h4>
-                                <div class="order-column" id="cookingOrdersContainer">
-                                </div>
+            <!-- ========================== داشبورد ========================== -->
+            <section class="app-section active fade-up" id="section-dashboard">
+                <div class="section-hero hero-orange">
+                    <div class="hero-row">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hero-icon"><i class="bi bi-grid-1x2-fill"></i></div>
+                            <div>
+                                <h3>نمای کلی رستوران</h3>
+                                <div class="sub">وضعیت لحظه‌ای سفارش‌ها، آشپزخانه و درآمد</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- وضعیت ارسال -->
-                <div class="tab-pane fade" id="nav-robot" role="tabpanel" aria-labelledby="nav-robot-tab">
-                    <div class="row">
-                        <div class="col-lg-6 mx-auto">
-                            <div class="card robot-panel">
-                                <h4 class="section-title">
-                                    <i class="bi bi-truck"></i> وضعیت ارسال و تحویل
-                                </h4>
-
-                                <div class="dispatch-station">
-                                    <div class="station-icon"><i class="bi bi-box-seam"></i></div>
-                                    <h5 class="mb-0 fw-bold">ایستگاه ارسال ۰۱</h5>
-                                    <div class="text-muted small mt-1">آماده دریافت سفارش بعدی</div>
-                                </div>
-
-                                <div class="dispatch-row">
-                                    <span class="label">وضعیت:</span>
-                                    <span class="value" style="color: var(--basil);">آماده</span>
-                                </div>
-                                <div class="dispatch-row">
-                                    <span class="label">مقصد بعدی:</span>
-                                    <span class="value">—</span>
-                                </div>
-                                <div class="dispatch-row mb-4">
-                                    <span class="label">ظرفیت باقی‌مانده:</span>
-                                    <span class="value" style="color: var(--slate);">۹۱٪</span>
-                                </div>
-
-                                <h6 class="text-muted mb-2 mt-2" style="font-size:0.82rem; font-weight:700;">آخرین تحویل‌ها</h6>
-                                <div>
-                                    <div class="delivery-log-item">
-                                        <span>سفارش ۱۱۵</span> <span class="tag">میز ۲</span>
-                                    </div>
-                                    <div class="delivery-log-item">
-                                        <span>سفارش ۱۱۶</span> <span class="tag">میز ۵</span>
-                                    </div>
-                                    <div class="delivery-log-item">
-                                        <span>سفارش ۱۱۷</span> <span class="tag">میز ۳</span>
-                                    </div>
-                                </div>
+                <div class="row g-3 mb-4 stagger stat-card-3d-wrap">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="glass-card stat-card tilt">
+                            <div class="stat-icon i-orange stat-icon-3d"><i class="bi bi-receipt"></i></div>
+                            <div>
+                                <div class="stat-label">مجموع سفارش‌ها</div>
+                                <div class="stat-value stat-value-3d" id="statTotalOrders">0</div>
+                                <div class="stat-spark" id="sparkTotal" style="--bar-color: var(--orange);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="glass-card stat-card tilt">
+                            <div class="stat-icon i-red stat-icon-3d"><i class="bi bi-fire"></i></div>
+                            <div>
+                                <div class="stat-label">در حال پخت</div>
+                                <div class="stat-value stat-value-3d" id="statCookingOrders">0</div>
+                                <div class="stat-spark" id="sparkCooking" style="--bar-color: var(--red);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="glass-card stat-card tilt">
+                            <div class="stat-icon i-green stat-icon-3d"><i class="bi bi-check2-circle"></i></div>
+                            <div>
+                                <div class="stat-label">آماده ارسال</div>
+                                <div class="stat-value stat-value-3d" id="statReadyOrders">0</div>
+                                <div class="stat-spark" id="sparkReady" style="--bar-color: var(--green);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="glass-card stat-card tilt">
+                            <div class="stat-icon i-yellow stat-icon-3d"><i class="bi bi-cash-coin"></i></div>
+                            <div>
+                                <div class="stat-label">درآمد (سفارش‌های جاری)</div>
+                                <div class="stat-value stat-value-3d mono" id="statRevenue" style="font-size:1.05rem;">۰ تومان</div>
+                                <div class="stat-spark" id="sparkRevenue" style="--bar-color: var(--yellow);"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- مدیریت منو -->
-                <div class="tab-pane fade" id="nav-menu" role="tabpanel" aria-labelledby="nav-menu-tab">
+                <div class="glass-card pipeline-wrap">
+                    <h6 class="fw-bold mb-2">پایپ‌لاین سفارش‌ها</h6>
+                    <div class="pipeline-track" id="pipelineTrack"></div>
+                </div>
+            </section>
 
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                        <h4 class="section-title mb-0">
-                            <i class="bi bi-journal-richtext"></i> مدیریت منوی غذا
-                        </h4>
-                        <div class="d-flex gap-2">
+            <!-- ========================== سفارش‌ها ========================== -->
+            <section class="app-section" id="section-orders">
+                <div class="section-hero hero-blue">
+                    <div class="hero-row">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hero-icon"><i class="bi bi-receipt-cutoff"></i></div>
+                            <div>
+                                <h3>مدیریت سفارش‌ها</h3>
+                                <div class="sub">تایید، رد و ارسال سفارش‌های فعال</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="order-column-wrap glass-card col-new h-100">
+                            <div class="col-title"><i class="bi bi-bell-fill ic-new"></i> سفارش‌های جدید
+                                <span class="count-pill mono" id="newOrdersCount">0</span>
+                            </div>
+                            <div class="order-column" id="ordersContainer" style="max-height:none;"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="order-column-wrap glass-card col-ready h-100">
+                            <div class="col-title"><i class="bi bi-box-seam ic-ready"></i> آماده ارسال
+                                <span class="count-pill mono" id="readyOrdersCount">0</span>
+                            </div>
+                            <div class="order-column" id="readyOrdersContainer" style="max-height:none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================== آشپزخانه ========================== -->
+            <section class="app-section" id="section-cooking">
+                <div class="section-hero hero-red">
+                    <div class="hero-row">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hero-icon"><i class="bi bi-fire"></i></div>
+                            <div>
+                                <h3>آشپزخانه</h3>
+                                <div class="sub">جریان کار سفارش‌ها از ثبت تا ارسال</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-column-wrap glass-card col-cooking">
+                    <div class="col-title"><i class="bi bi-fire ic-cooking"></i> در حال آماده‌سازی
+                        <span class="count-pill mono" id="cookingOrdersCount">0</span>
+                    </div>
+                    <div class="order-column" id="cookingOrdersContainer" style="max-height:none;"></div>
+                </div>
+            </section>
+
+            <!-- ========================== منو ========================== -->
+            <section class="app-section" id="section-menu">
+                <div class="section-hero hero-yellow">
+                    <div class="hero-row">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hero-icon"><i class="bi bi-journal-richtext"></i></div>
+                            <div>
+                                <h3>مدیریت منو</h3>
+                                <div class="sub">افزودن، ویرایش و حذف غذاها</div>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
                             <button class="btn btn-outline-brand" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
                                 <i class="bi bi-tags"></i> افزودن دسته
                             </button>
-                            <button class="btn btn-primary-brand" data-bs-toggle="modal" data-bs-target="#addFoodModal">
+                            <button class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#addFoodModal">
                                 <i class="bi bi-plus-lg"></i> افزودن غذا
                             </button>
                         </div>
                     </div>
-
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle text-center mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>تصویر</th>
-                                            <th>نام غذا</th>
-                                            <th>قیمت</th>
-                                            <th>موجودی</th>
-                                            <th>وضعیت</th>
-                                            <th>عملیات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="foodsContainer">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="card p-3 food-stock">
-                                <h5 class="section-title border-0 mb-2">
-                                    <i class="bi bi-box-fill"></i> موجودی انبار
-                                </h5>
-                                <div id="foodStockContainer">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
-            </div>
-        </div>
+                <div class="glass-card pro-table-card">
+                    <div class="table-responsive">
+                        <table class="pro-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>نام غذا</th>
+                                    <th>دسته</th>
+                                    <th>قیمت</th>
+                                    <th>موجودی</th>
+                                    <th>وضعیت</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="foodsContainer"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================== انبار ========================== -->
+            <section class="app-section" id="section-inventory">
+                <div class="section-hero hero-green">
+                    <div class="hero-row">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hero-icon"><i class="bi bi-box-seam"></i></div>
+                            <div>
+                                <h3>انبار و موجودی</h3>
+                                <div class="sub">اقلام با موجودی کم ابتدا نمایش داده می‌شوند</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card pro-table-card">
+                    <div class="table-responsive">
+                        <table class="pro-table">
+                            <thead>
+                                <tr>
+                                    <th>نام غذا</th>
+                                    <th>سطح موجودی</th>
+                                    <th>تعداد</th>
+                                    <th>وضعیت</th>
+                                </tr>
+                            </thead>
+                            <tbody id="foodStockContainer"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================== تحلیل‌ها ========================== -->
+            <section class="app-section" id="section-analytics">
+                <div class="section-hero hero-blue">
+                    <div class="hero-row">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hero-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
+                            <div>
+                                <h3>تحلیل و گزارش</h3>
+                                <div class="sub">نمودارهای عملکرد رستوران</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-strip" id="kpiStrip"></div>
+
+                <div class="row g-3">
+                    <div class="col-lg-7">
+                        <div class="glass-card chart-card h-100">
+                            <div class="chart-head"><h6>فروش روزانه</h6></div>
+                            <div class="chart-canvas-wrap"><canvas id="dailySalesChart"></canvas></div>
+                            <div class="chart-note">داده نمایشی — تا اتصال اندپوینت گزارش فروش، این نمودار مقدار واقعی نشان نمی‌دهد.</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="glass-card chart-card h-100">
+                            <div class="chart-head"><h6>وضعیت سفارش‌ها</h6></div>
+                            <div class="chart-canvas-wrap"><canvas id="orderStatusChart"></canvas></div>
+                            <div class="chart-note">بر اساس سفارش‌های فعال، به‌صورت زنده بروزرسانی می‌شود.</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="glass-card chart-card">
+                            <div class="chart-head"><h6>محبوب‌ترین غذاها</h6></div>
+                            <div class="chart-canvas-wrap"><canvas id="popularFoodsChart"></canvas></div>
+                            <div class="chart-note">بر اساس آیتم‌های سفارش‌های فعال فعلی محاسبه می‌شود.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================== تنظیمات ========================== -->
+            <section class="app-section" id="section-settings">
+                <div class="section-hero hero-red">
+                    <div class="hero-row">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hero-icon"><i class="bi bi-gear-fill"></i></div>
+                            <div>
+                                <h3>تنظیمات</h3>
+                                <div class="sub">این بخش نمایشی است و به بک‌اند متصل نیست</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="glass-card p-4 settings-form">
+                            <h6 class="fw-bold mb-3">اطلاعات رستوران</h6>
+                            <div class="mb-3">
+                                <label class="form-label">نام رستوران</label>
+                                <input type="text" class="form-control" placeholder="مثلاً رستوران میدنایت">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">شماره تماس</label>
+                                <input type="text" class="form-control" placeholder="۰۲۱-xxxxxxx">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">آدرس</label>
+                                <input type="text" class="form-control" placeholder="آدرس رستوران">
+                            </div>
+                            <button type="button" class="btn btn-brand" disabled>ذخیره تغییرات (نیازمند اندپوینت بک‌اند)</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="glass-card p-4">
+                            <h6 class="fw-bold mb-2">اعلان‌ها</h6>
+                            <div class="settings-row">
+                                <div><div class="t">سفارش جدید</div><div class="d">اعلان صوتی هنگام ثبت سفارش جدید</div></div>
+                                <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked></div>
+                            </div>
+                            <div class="settings-row">
+                                <div><div class="t">هشدار موجودی کم</div><div class="d">اطلاع‌رسانی وقتی موجودی غذا کم می‌شود</div></div>
+                                <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked></div>
+                            </div>
+                            <div class="settings-row">
+                                <div><div class="t">حالت تیره</div><div class="d">Midnight Kitchen Pro همیشه تیره است</div></div>
+                                <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked disabled></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
     </div>
 </div>
 
@@ -751,9 +398,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-brand" data-bs-dismiss="modal">لغو</button>
-                <button type="button" class="btn btn-primary-brand" onclick="createCategory()">
-                    <i class="bi bi-check-lg"></i> ذخیره دسته
-                </button>
+                <button type="button" class="btn btn-brand" onclick="createCategory()"><i class="bi bi-check-lg"></i> ذخیره دسته</button>
             </div>
         </div>
     </div>
@@ -793,9 +438,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-brand" data-bs-dismiss="modal">لغو</button>
-                <button type="button" class="btn btn-primary-brand" onclick="createFood()">
-                    <i class="bi bi-check-lg"></i> افزودن غذا
-                </button>
+                <button type="button" class="btn btn-brand" onclick="createFood()"><i class="bi bi-check-lg"></i> افزودن غذا</button>
             </div>
         </div>
     </div>
@@ -811,30 +454,19 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editFoodId">
-                <div class="mb-3">
-                    <label class="form-label">نام غذا</label>
-                    <input type="text" id="editFoodName" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">قیمت</label>
-                    <input type="number" id="editFoodPrice" class="form-control" min="0">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">موجودی</label>
-                    <input type="number" id="editFoodStock" class="form-control" min="0">
-                </div>
+                <div class="mb-3"><label class="form-label">نام غذا</label><input type="text" id="editFoodName" class="form-control"></div>
+                <div class="mb-3"><label class="form-label">قیمت</label><input type="number" id="editFoodPrice" class="form-control" min="0"></div>
+                <div class="mb-3"><label class="form-label">موجودی</label><input type="number" id="editFoodStock" class="form-control" min="0"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-brand" data-bs-dismiss="modal">لغو</button>
-                <button type="button" class="btn btn-primary-brand" onclick="updateFood()">
-                    <i class="bi bi-check-lg"></i> ذخیره تغییرات
-                </button>
+                <button type="button" class="btn btn-brand" onclick="updateFood()"><i class="bi bi-check-lg"></i> ذخیره تغییرات</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- مودال ارسال سفارش (شناسه robotModal برای سازگاری با اسکریپت فعلی حفظ شده) -->
+<!-- مودال ارسال سفارش -->
 <div class="modal fade" id="robotModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -844,43 +476,18 @@
             </div>
             <div class="modal-body">
                 <p class="fs-5 mb-3">آیا سفارش آماده ارسال است؟</p>
-                <div class="alert alert-dark border-0">
-                    پس از تایید، اطلاعات سفارش برای واحد ارسال ثبت می‌شود.
-                </div>
+                <div class="alert alert-dark border-0">پس از تایید، اطلاعات سفارش برای واحد ارسال ثبت می‌شود.</div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-brand" data-bs-dismiss="modal">خیر</button>
-                <button class="btn btn-primary-brand" onclick="sendRobot()">بله، ارسال شود</button>
+                <button class="btn btn-brand" onclick="sendRobot()">بله، ارسال شود</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // هماهنگ‌سازی وضعیت فعال بین سایدبار دسکتاپ و آفکانواس موبایل
-    document.querySelectorAll('#v-pills-tab-desktop .rail-link').forEach(function (railBtn) {
-        railBtn.addEventListener('click', function () {
-            document.querySelectorAll('#v-pills-tab-desktop .rail-link').forEach(el => el.classList.remove('active'));
-            railBtn.classList.add('active');
-            var syncId = railBtn.getAttribute('data-sync');
-            var target = railBtn.getAttribute('data-bs-target');
-            var offcanvasBtn = document.getElementById(syncId);
-            if (offcanvasBtn) {
-                var tabTrigger = new bootstrap.Tab(offcanvasBtn);
-                tabTrigger.show();
-            }
-        });
-    });
-    document.querySelectorAll('#v-pills-tab .nav-link').forEach(function (navBtn) {
-        navBtn.addEventListener('shown.bs.tab', function () {
-            var target = navBtn.getAttribute('data-bs-target');
-            document.querySelectorAll('#v-pills-tab-desktop .rail-link').forEach(function (railBtn) {
-                railBtn.classList.toggle('active', railBtn.getAttribute('data-bs-target') === target);
-            });
-        });
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="{% static 'js/dashboard.js' %}"></script>
 
 </body>
