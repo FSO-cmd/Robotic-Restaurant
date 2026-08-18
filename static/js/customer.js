@@ -208,9 +208,7 @@ function setupSearch() {
 }
 
 
-// ==========================
-// Render Foods
-// ==========================
+
 
 function renderFoods(data) {
     const container = document.getElementById("menuContainer");
@@ -265,9 +263,7 @@ function renderFoods(data) {
 }
 
 
-// ==========================
-// Scroll Reveal
-// ==========================
+
 
 function observeReveal() {
     const cards = document.querySelectorAll(".food-card:not(.reveal)");
@@ -287,9 +283,7 @@ function observeReveal() {
 }
 
 
-// ==========================
-// Add / Increase / Decrease / Remove
-// ==========================
+
 
 function addFood(id, name, price, sourceBtn) {
     let item = cart.find(food => food.id === id);
@@ -331,9 +325,7 @@ function removeItem(index) {
 }
 
 
-// ==========================
-// Render Cart
-// ==========================
+
 
 function renderCart() {
     const cartItems = document.getElementById("cartItems");
@@ -399,9 +391,7 @@ function updateMobileBar(count, total) {
 }
 
 
-// ==========================
-// Cart Drawer
-// ==========================
+
 
 function setupCartDrawer() {
     const drawer = document.getElementById("cartDrawer");
@@ -418,9 +408,7 @@ function setupCartDrawer() {
 }
 
 
-// ==========================
-// Submit Order
-// ==========================
+
 
 async function submitOrder() {
     const table = document.getElementById("tableNumber").value;
@@ -469,9 +457,7 @@ async function submitOrder() {
 }
 
 
-// ==========================
-// Hero Parallax (پرسپکتیو لایه‌ای)
-// ==========================
+
 
 (function () {
     const floaties = document.querySelectorAll(".floaty");
